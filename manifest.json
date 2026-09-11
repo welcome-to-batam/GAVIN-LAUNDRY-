@@ -1,0 +1,22 @@
+{
+  "name": "GAVIN LAUNDRY App",
+  "short_name": "GavinLaundry",
+  "description": "Solusi Cucian Anda! Bersih, Wangi, Siap Pakai!",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme-color": "#2563eb",
+  "icons": [
+    {
+      "src": "public/logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "public/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
+
