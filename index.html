@@ -14,9 +14,11 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         body { background-color: #f8fafc; color: #334155; overflow-x: hidden; }
         
-        /* Header Tetap di Atas */
+        /* 1. ANIMASI HEADER 4 WARNA BERGERAK LEMBUT */
         header {
-            background-color: #ffffff;
+            background: linear-gradient(-45deg, #2563eb, #a855f7, #0ea5e9, #ec4899);
+            background-size: 400% 400%;
+            animation: gradientHeader 8s ease infinite;
             height: 70px;
             display: flex;
             align-items: center;
@@ -25,14 +27,24 @@
             position: fixed;
             top: 0; left: 0; width: 100%;
             z-index: 1000;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
         }
+
+        @keyframes gradientHeader {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
         .logo-container img {
             width: 45px; height: 45px;
             border-radius: 50%;
             object-fit: cover;
-            border: 2px solid #2563eb;
+            border: 2px solid #ffffff;
+            background-color: white;
         }
+
+        /* Tombol Menu Garis Tiga (Putih agar kontras dengan header) */
         .menu-toggle {
             background: none; border: none; cursor: pointer;
             display: flex; flex-direction: column; justify-content: space-between;
@@ -40,62 +52,121 @@
         }
         .menu-toggle span {
             display: block; height: 3px; width: 100%;
-            background-color: #2563eb; border-radius: 3px;
+            background-color: #ffffff; border-radius: 3px;
             transition: all 0.3s ease;
         }
 
-        /* Efek Menu Laci Terbuka Pelan */
+        /* 2. BACKGROUND MENU LACI YANG COCOK (Fresh & Clean) */
         .nav-menu {
             position: fixed;
-            top: -350px; /* Sembunyi di atas header */
+            top: -450px;
             left: 0; width: 100%;
-            background-color: #ffffff;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            transition: top 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            background-color: rgba(240, 253, 250, 0.98); /* Warna biru muda segar semi-transparan */
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            transition: top 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 999;
-            padding: 20px 0 10px 0;
-            border-bottom: 4px solid #2563eb;
+            padding: 20px 0 15px 0;
+            border-bottom: 4px solid #0ea5e9;
         }
-        .nav-menu.open { top: 70px; } /* Turun mulus ke bawah header */
+        .nav-menu.open { top: 70px; }
         .nav-menu ul { list-style: none; display: flex; flex-direction: column; align-items: center; }
-        .nav-menu ul li { margin: 12px 0; width: 100%; text-align: center; }
-        .nav-menu ul li a { text-decoration: none; color: #334155; font-size: 1.1rem; font-weight: 600; display: block; }
-        .nav-menu ul li a:hover { color: #2563eb; }
-
-        /* Background Foto Atas (Hero) */
-        .hero {
-            margin-top: 70px;
-            height: 260px;
-            background-image: linear-gradient(rgba(37, 99, 235, 0.4), rgba(29, 78, 216, 0.7)), url('public/laundry-bg.jpg');
-            background-size: cover; background-position: center;
+        .nav-menu ul li { margin: 10px 0; width: 100%; text-align: center; }
+        
+        .nav-menu ul li a { 
+            text-decoration: none; 
+            color: #1e293b; 
+            font-size: 1.2rem; 
+            font-weight: 600; 
+            display: block;
+            padding: 8px 0;
+            transition: all 0.2s;
+        }
+        .nav-menu ul li a:hover { 
+            color: #2563eb; 
+            background-color: rgba(37, 99, 235, 0.08);
         }
 
-        /* Kartu Slogan Utama */
-        .main-container { padding: 20px; max-width: 500px; margin: -40px auto 40px auto; position: relative; z-index: 10; }
+        /* Konten Pengatur Halaman */
+        .page-content {
+            display: none; /* Sembunyikan semua halaman dulu */
+            margin-top: 70px;
+            padding: 20px;
+            animation: fadeIn 0.4s ease;
+        }
+        .page-content.active {
+            display: block; /* Hanya tampilkan halaman yang aktif */
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Desain Standar Halaman Baru Otomatis */
+        .custom-page-box {
+            background: white;
+            border-radius: 20px;
+            padding: 30px 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            text-align: center;
+            max-width: 500px;
+            margin: 20px auto;
+        }
+        .custom-page-title {
+            color: #2563eb;
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+        .custom-page-desc {
+            color: #64748b;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        /* Halaman Beranda (Tampilan Lama Anda) */
+        .hero {
+            height: 200px;
+            background-image: linear-gradient(rgba(37, 99, 235, 0.2), rgba(29, 78, 216, 0.5)), url('public/laundry-bg.jpg');
+            background-size: cover; background-position: center;
+            border-radius: 0 0 25px 25px;
+        }
+        .main-container { padding: 0 10px; max-width: 500px; margin: -50px auto 40px auto; position: relative; }
         .slogan-card { background: #ffffff; border-radius: 20px; padding: 30px 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); text-align: center; }
         .app-title { color: #2563eb; font-size: 2rem; font-weight: 700; letter-spacing: 1px; }
         .app-subtitle { color: #0ea5e9; font-size: 1.3rem; font-weight: 600; margin-bottom: 20px; }
         .pusing-text { font-size: 1.05rem; color: #64748b; margin-bottom: 8px; }
         .serahkan-text { font-size: 1.1rem; font-weight: 600; color: #1e293b; margin-bottom: 24px; }
 
-        /* Fitur Unggulan */
         .features-list { text-align: left; display: inline-block; margin-bottom: 28px; }
         .feature-item { font-size: 1.1rem; margin: 10px 0; display: flex; align-items: center; font-weight: 600; }
         .feature-item span { margin-right: 12px; font-size: 1.3rem; }
 
-        /* Kotak Promo */
         .promo-box { background-color: #f0fdf4; border: 2px dashed #22c55e; border-radius: 12px; padding: 15px; margin-bottom: 24px; }
         .promo-title { color: #15803d; font-weight: 700; font-size: 1.1rem; }
         .promo-desc { color: #166534; font-size: 0.95rem; }
 
-        /* Tombol Pesan */
-        .cta-btn { display: block; background-color: #2563eb; color: white; text-decoration: none; padding: 14px; border-radius: 50px; font-weight: 700; font-size: 1.1rem; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); transition: all 0.2s; }
-        .cta-btn:active { transform: scale(0.98); background-color: #1d4ed8; }
+        .cta-btn { display: block; background-color: #2563eb; color: white; text-decoration: none; padding: 14px; border-radius: 50px; font-weight: 700; font-size: 1.1rem; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); }
         .footer-tagline { font-size: 0.9rem; color: #94a3b8; font-weight: 600; margin-top: 20px; line-height: 1.6; }
+        
+        /* Tombol Kembali ke Beranda */
+        .back-btn {
+            display: inline-block;
+            background: #e2e8f0;
+            color: #334155;
+            text-decoration: none;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
 
+    <!-- HEADER DENGAN ANIMASI GRADIENT LUAR BIASA -->
     <header>
         <div class="logo-container">
             <img src="public/logo.png" alt="Logo Gavin Laundry" onerror="this.src='https://placeholder.com'">
@@ -105,68 +176,129 @@
         </button>
     </header>
 
+    <!-- MENU LACI DENGAN WARNA BACKGROUND BAGUS -->
     <nav class="nav-menu" id="navMenu">
         <ul>
-            <li><a href="#beranda">Beranda</a></li>
-            <li><a href="#melayani">Melayani</a></li>
-            <li><a href="#galery">Galery</a></li>
-            <li><a href="#testimoni">Testimoni</a></li>
-            <li><a href="#tentang">Tentang Kami</a></li>
-            <li><a href="#hubungi">Hubungi Kami</a></li>
+            <li><a href="#" onclick="bukaHalaman('beranda')">Beranda</a></li>
+            <li><a href="#" onclick="bukaHalaman('melayani')">Melayani</a></li>
+            <li><a href="#" onclick="bukaHalaman('galery')">Galery</a></li>
+            <li><a href="#" onclick="bukaHalaman('testimoni')">Testimoni</a></li>
+            <li><a href="#" onclick="bukaHalaman('tentang')">Tentang Kami</a></li>
+            <li><a href="#" onclick="bukaHalaman('hubungi')">Hubungi Kami</a></li>
         </ul>
     </nav>
 
-    <div class="hero"></div>
+    <!-- ================= HALAMAN 1: BERANDA ================= -->
+    <div id="beranda" class="page-content active">
+        <div class="hero"></div>
+        <div class="main-container">
+            <div class="slogan-card">
+                <h1 class="app-title">GAVIN LAUNDRY</h1>
+                <h2 class="app-subtitle">Solusi Cucian Anda!</h2>
+                <p class="pusing-text">Cucian numpuk? Jangan bikin pusing! 😄</p>
+                <p class="serahkan-text">Serahkan cucian Anda kepada GAVIN LAUNDRY.</p>
 
-    <div class="main-container">
-        <div class="slogan-card">
-            <h1 class="app-title">GAVIN LAUNDRY</h1>
-            <h2 class="app-subtitle">Solusi Cucian Anda!</h2>
-            
-            <p class="pusing-text">Cucian numpuk? Jangan bikin pusing! 😄</p>
-            <p class="serahkan-text">Serahkan cucian Anda kepada GAVIN LAUNDRY.</p>
+                <div class="features-list">
+                    <div class="feature-item"><span>✅</span> Bersih</div>
+                    <div class="feature-item"><span>🌸</span> Wangi</div>
+                    <div class="feature-item"><span>👕</span> Rapi</div>
+                    <div class="feature-item"><span>⏰</span> Praktis & Hemat Waktu</div>
+                </div>
 
-            <div class="features-list">
-                <div class="feature-item"><span>✅</span> Bersih</div>
-                <div class="feature-item"><span>🌸</span> Wangi</div>
-                <div class="feature-item"><span>👕</span> Rapi</div>
-                <div class="feature-item"><span>⏰</span> Praktis & Hemat Waktu</div>
-            </div>
+                <div class="promo-box">
+                    <div class="promo-title">🎉 PROMO PELANGGAN BARU!</div>
+                    <div class="promo-desc">Dapatkan harga spesial untuk laundry pertama Anda!</div>
+                </div>
 
-            <div class="promo-box">
-                <div class="promo-title">🎉 PROMO PELANGGAN BARU!</div>
-                <div class="promo-desc">Dapatkan harga spesial untuk laundry pertama Anda!</div>
-            </div>
+                <a href="https://wa.me" class="cta-btn" target="_blank">📲 Pesan Sekarang</a>
 
-            <a href="https://wa.me" class="cta-btn" target="_blank">📲 Pesan Sekarang</a>
-
-            <div class="footer-tagline">
-                GAVIN LAUNDRY<br>
-                Bersih, Wangi, Siap Pakai! 🧺✨
+                <div class="footer-tagline">
+                    GAVIN LAUNDRY<br>
+                    Bersih, Wangi, Siap Pakai! 🧺✨
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- ================= 3. HALAMAN BARU OTOMATIS (Bisa Anda Edit Nanti) ================= -->
+    
+    <!-- HALAMAN MELAYANI -->
+    <div id="melayani" class="page-content">
+        <div class="custom-page-box">
+            <h1 class="custom-page-title">Melayani</h1>
+            <p class="custom-page-desc">Halaman ini berisi daftar layanan GAVIN LAUNDRY. (Contoh: Cuci Kiloan, Cuci Satuan, Bedcover, Sepatu, Boneka, dll).</p>
+            <a href="#" class="back-btn" onclick="bukaHalaman('beranda')">⬅️ Kembali</a>
+        </div>
+    </div>
+            
+    <!-- HALAMAN GALERY -->
+    <div id="galery" class="page-content">
+        <div class="custom-page-box">
+            <h1 class="custom-page-title">Galery</h1>
+            <p class="custom-page-desc">Halaman ini menampilkan foto-foto tempat usaha, mesin cuci modern, dan hasil setrika rapi GAVIN LAUNDRY Anda.</p>
+            <a href="#" class="back-btn" onclick="bukaHalaman('beranda')">⬅️ Kembali</a>
+        </div>
+    </div>
+
+    <!-- HALAMAN TESTIMONI -->
+    <div id="testimoni" class="page-content">
+        <div class="custom-page-box">
+            <h1 class="custom-page-title">Testimoni</h1>
+            <p class="custom-page-desc">Apa kata mereka? Halaman ini berisi ulasan kepuasan dari para pelanggan setia GAVIN LAUNDRY.</p>
+            <a href="#" class="back-btn" onclick="bukaHalaman('beranda')">⬅️ Kembali</a>
+        </div>
+    </div>
+
+    <!-- HALAMAN TENTANG KAMI -->
+    <div id="tentang" class="page-content">
+        <div class="custom-page-box">
+            <h1 class="custom-page-title">Tentang Kami</h1>
+            <p class="custom-page-desc">Kisah perjalanan GAVIN LAUNDRY dalam memberikan pelayanan cuci terbaik, bersih, profesional, dan tepercaya untuk Anda.</p>
+            <a href="#" class="back-btn" onclick="bukaHalaman('beranda')">⬅️ Kembali</a>
+        </div>
+    </div>
+
+    <!-- HALAMAN HUBUNGI KAMI -->
+    <div id="hubungi" class="page-content">
+        <div class="custom-page-box">
+            <h1 class="custom-page-title">Hubungi Kami</h1>
+            <p class="custom-page-desc">Punya pertanyaan atau lokasi toko? Anda bisa menaruh alamat maps, nomor telepon, atau sosial media laundry Anda di sini.</p>
+            <a href="#" class="back-btn" onclick="bukaHalaman('beranda')">⬅️ Kembali</a>
+        </div>
+    </div>
+
+    <!-- SCRIPT JAVASCRIPT UNTUK NAVIGASI DAN PWA -->
     <script>
-        // Logika Animasi Laci Menu Garis Tiga
+        // Logika Laci Menu Buka/Tutup
         const menuToggle = document.getElementById('menuToggle');
         const navMenu = document.getElementById('navMenu');
-        const spans = menuToggle.querySelectorAll('span');
 
         menuToggle.addEventListener('click', () => {
             navMenu.classList.toggle('open');
-            if(navMenu.classList.contains('open')) {
-                spans[0].style.transform = 'rotate(45deg) translate(6px, 6px)';
-                spans[1].style.opacity = '0';
-                spans[2].style.transform = 'rotate(-45deg) translate(6px, -6px)';
-            } else {
-                spans[0].style.transform = 'none';
-                spans[1].style.opacity = '1';
-                spans[2].style.transform = 'none';
-            }
         });
 
-        // PWA Service Worker Registration
+        // LOGIKA PERPINDAHAN HALAMAN SECARA OTOMATIS
+        function bukaHalaman(idHalaman) {
+            // 1. Sembunyikan semua halaman terlebih dahulu
+            const semuaHalaman = document.querySelectorAll('.page-content');
+            semuaHalaman.forEach(halaman => {
+                halaman.classList.remove('active');
+            });
+
+            // 2. Tampilkan halaman yang dipilih pelanggan
+            const halamanTujuan = document.getElementById(idHalaman);
+            if (halamanTujuan) {
+                halamanTujuan.classList.add('active');
+            }
+
+            // 3. Otomatis tutup kembali laci menu setelah diklik
+            navMenu.classList.remove('open');
+            
+            // 4. Geser layar otomatis kembali ke posisi paling atas agar tidak tenggelam
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+
+        // Registrasi Service Worker PWA agar bisa diinstall di HP
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js');
@@ -175,4 +307,4 @@
     </script>
 </body>
 </html>
-
+            
