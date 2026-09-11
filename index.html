@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GAVIN LAUNDRY - Solusi Cucian Anda!</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <link rel="apple-touch-icon" href="public/logo.png">
+    <link rel="preconnect" href="https://googleapis.com">
+    <link rel="preconnect" href="https://gstatic.com" crossorigin>
+    <link href="https://googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background-color: #f8fafc; color: #334155; overflow-x: hidden; }
+        
+        /* Header Tetap di Atas */
+        header {
+            background-color: #ffffff;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            position: fixed;
+            top: 0; left: 0; width: 100%;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .logo-container img {
+            width: 45px; height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #2563eb;
+        }
+        .menu-toggle {
+            background: none; border: none; cursor: pointer;
+            display: flex; flex-direction: column; justify-content: space-between;
+            width: 30px; height: 21px; z-index: 1001;
+        }
+        .menu-toggle span {
+            display: block; height: 3px; width: 100%;
+            background-color: #2563eb; border-radius: 3px;
+            transition: all 0.3s ease;
+        }
+
+        /* Efek Menu Laci Terbuka Pelan */
+        .nav-menu {
+            position: fixed;
+            top: -350px; /* Sembunyi di atas header */
+            left: 0; width: 100%;
+            background-color: #ffffff;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: top 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 999;
+            padding: 20px 0 10px 0;
+            border-bottom: 4px solid #2563eb;
+        }
+        .nav-menu.open { top: 70px; } /* Turun mulus ke bawah header */
+        .nav-menu ul { list-style: none; display: flex; flex-direction: column; align-items: center; }
+        .nav-menu ul li { margin: 12px 0; width: 100%; text-align: center; }
+        .nav-menu ul li a { text-decoration: none; color: #334155; font-size: 1.1rem; font-weight: 600; display: block; }
+        .nav-menu ul li a:hover { color: #2563eb; }
+
+        /* Background Foto Atas (Hero) */
+        .hero {
+            margin-top: 70px;
+            height: 260px;
+            background-image: linear-gradient(rgba(37, 99, 235, 0.4), rgba(29, 78, 216, 0.7)), url('public/laundry-bg.jpg');
+            background-size: cover; background-position: center;
+        }
+
+        /* Kartu Slogan Utama */
+        .main-container { padding: 20px; max-width: 500px; margin: -40px auto 40px auto; position: relative; z-index: 10; }
+        .slogan-card { background: #ffffff; border-radius: 20px; padding: 30px 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); text-align: center; }
+        .app-title { color: #2563eb; font-size: 2rem; font-weight: 700; letter-spacing: 1px; }
+        .app-subtitle { color: #0ea5e9; font-size: 1.3rem; font-weight: 600; margin-bottom: 20px; }
+        .pusing-text { font-size: 1.05rem; color: #64748b; margin-bottom: 8px; }
+        .serahkan-text { font-size: 1.1rem; font-weight: 600; color: #1e293b; margin-bottom: 24px; }
+
+        /* Fitur Unggulan */
+        .features-list { text-align: left; display: inline-block; margin-bottom: 28px; }
+        .feature-item { font-size: 1.1rem; margin: 10px 0; display: flex; align-items: center; font-weight: 600; }
+        .feature-item span { margin-right: 12px; font-size: 1.3rem; }
+
+        /* Kotak Promo */
+        .promo-box { background-color: #f0fdf4; border: 2px dashed #22c55e; border-radius: 12px; padding: 15px; margin-bottom: 24px; }
+        .promo-title { color: #15803d; font-weight: 700; font-size: 1.1rem; }
+        .promo-desc { color: #166534; font-size: 0.95rem; }
+
+        /* Tombol Pesan */
+        .cta-btn { display: block; background-color: #2563eb; color: white; text-decoration: none; padding: 14px; border-radius: 50px; font-weight: 700; font-size: 1.1rem; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); transition: all 0.2s; }
+        .cta-btn:active { transform: scale(0.98); background-color: #1d4ed8; }
+        .footer-tagline { font-size: 0.9rem; color: #94a3b8; font-weight: 600; margin-top: 20px; line-height: 1.6; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-container">
+            <img src="public/logo.png" alt="Logo Gavin Laundry" onerror="this.src='https://placeholder.com'">
+        </div>
+        <button class="menu-toggle" id="menuToggle">
+            <span></span><span></span><span></span>
+        </button>
+    </header>
+
+    <nav class="nav-menu" id="navMenu">
+        <ul>
+            <li><a href="#beranda">Beranda</a></li>
+            <li><a href="#melayani">Melayani</a></li>
+            <li><a href="#galery">Galery</a></li>
+            <li><a href="#testimoni">Testimoni</a></li>
+            <li><a href="#tentang">Tentang Kami</a></li>
+            <li><a href="#hubungi">Hubungi Kami</a></li>
+        </ul>
+    </nav>
+
+    <div class="hero"></div>
+
+    <div class="main-container">
+        <div class="slogan-card">
+            <h1 class="app-title">GAVIN LAUNDRY</h1>
+            <h2 class="app-subtitle">Solusi Cucian Anda!</h2>
+            
+            <p class="pusing-text">Cucian numpuk? Jangan bikin pusing! 😄</p>
+            <p class="serahkan-text">Serahkan cucian Anda kepada GAVIN LAUNDRY.</p>
+
+            <div class="features-list">
+                <div class="feature-item"><span>✅</span> Bersih</div>
+                <div class="feature-item"><span>🌸</span> Wangi</div>
+                <div class="feature-item"><span>👕</span> Rapi</div>
+                <div class="feature-item"><span>⏰</span> Praktis & Hemat Waktu</div>
+            </div>
+
+            <div class="promo-box">
+                <div class="promo-title">🎉 PROMO PELANGGAN BARU!</div>
+                <div class="promo-desc">Dapatkan harga spesial untuk laundry pertama Anda!</div>
+            </div>
+
+            <a href="https://wa.me" class="cta-btn" target="_blank">📲 Pesan Sekarang</a>
+
+            <div class="footer-tagline">
+                GAVIN LAUNDRY<br>
+                Bersih, Wangi, Siap Pakai! 🧺✨
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Logika Animasi Laci Menu Garis Tiga
+        const menuToggle = document.getElementById('menuToggle');
+        const navMenu = document.getElementById('navMenu');
+        const spans = menuToggle.querySelectorAll('span');
+
+        menuToggle.addEventListener('click', () => {
+            navMenu.classList.toggle('open');
+            if(navMenu.classList.contains('open')) {
+                spans[0].style.transform = 'rotate(45deg) translate(6px, 6px)';
+                spans[1].style.opacity = '0';
+                spans[2].style.transform = 'rotate(-45deg) translate(6px, -6px)';
+            } else {
+                spans[0].style.transform = 'none';
+                spans[1].style.opacity = '1';
+                spans[2].style.transform = 'none';
+            }
+        });
+
+        // PWA Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js');
+            });
+        }
+    </script>
+</body>
+</html>
+
