@@ -127,12 +127,20 @@
 
         /* Halaman Beranda (Tampilan Lama Anda) */
         .hero {
-            height: 200px;
-            background-image: linear-gradient(rgba(37, 99, 235, 0.2), rgba(29, 78, 216, 0.5)), url('public/laundry-bg.jpg');
-            background-size: cover; background-position: center;
-            border-radius: 0 0 25px 25px;
+    margin-top: 70px;
+    height: 380px; /* Diubah dari 200px menjadi 380px agar gambar memanjang ke bawah */
+    background-image: linear-gradient(rgba(37, 99, 235, 0.1), rgba(29, 78, 216, 0.2)), url('public/laundry-bg.jpg');
+    background-size: contain; /* Diubah ke contain agar gambar brosur tidak terpotong kiri-kanannya */
+    background-repeat: no-repeat;
+    background-position: center;
+    background-color: #ffffff; /* Background putih pelapis jika gambar kurang lebar */
         }
-        .main-container { padding: 0 10px; max-width: 500px; margin: -50px auto 40px auto; position: relative; }
+        .main-container { 
+    padding: 0 15px; 
+    max-width: 500px; 
+    margin: 15px auto 40px auto; /* Diubah dari -50px menjadi 15px supaya dia turun di bawah gambar */
+    position: relative; 
+        }
         .slogan-card { background: #ffffff; border-radius: 20px; padding: 30px 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); text-align: center; }
         .app-title { color: #2563eb; font-size: 2rem; font-weight: 700; letter-spacing: 1px; }
         .app-subtitle { color: #0ea5e9; font-size: 1.3rem; font-weight: 600; margin-bottom: 20px; }
