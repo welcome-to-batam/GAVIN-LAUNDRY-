@@ -389,8 +389,22 @@
         </div>
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
     <!-- SCRIPT JAVASCRIPT UNTUK NAVIGASI DAN PWA -->
     <script>
+        const firebaseConfig = {
+  apiKey: "AIzaSyCmkkv9cHccaUyVRZ5ZPqgJm_HDJ79Vcy0",
+  authDomain: "gavin-laundry.firebaseapp.com",
+  projectId: "gavin-laundry",
+  storageBucket: "gavin-laundry.firebasestorage.app",
+  messagingSenderId: "789711438711",
+  appId: "1:789711438711:web:2348ea045317f0ed191772"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+        
         // Logika Laci Menu Buka/Tutup
         const menuToggle = document.getElementById('menuToggle');
         const navMenu = document.getElementById('navMenu');
@@ -467,18 +481,46 @@ fetch(`https://api.imgbb.com/1/upload?key=${api_key_bos}`, {
     return response.json();
 })
 .then(hasil => {
-    if (hasil.success) {
-        const linkGambarJadi = hasil.data.url; 
-        alert("Foto sukses terunggah!\n\nLink: " + linkGambarJadi);
-    } else {
-        alert("Gagal: " + (hasil.error ? hasil.error.message : "Eror tidak dikenal"));
+    if (!hasil.success) {
+        throw new Error(hasil.error ? hasil.error.message : "Eror tidak dikenal");
     }
+    // SIMPAN LINK FOTO KE DATABASE FIRESTORE
+    return db.collection('galeri').add({
+        url: hasil.data.url,
+        waktu: firebase.firestore.FieldValue.serverTimestamp()
+    });
+})
+.then(() => {
+    alert("🎉 Foto sukses terunggah & langsung tampil di galeri!");
 })
 .catch(error => {
     console.error('Detail Eror:', error);
     alert("Eror Terjadi!\nPenyebab: " + error.message);
 });
     }
+
+function muatGaleri() {
+    const grid = document.getElementById('grid-galeri-dinamis');
+
+    db.collection('galeri').orderBy('waktu', 'desc').onSnapshot(snapshot => {
+        grid.innerHTML = ''; // hapus tulisan "Belum ada foto"
+
+        if (snapshot.empty) {
+            grid.innerHTML = '<p style="color:#94a3b8; text-align:center; grid-column:span 2;">Belum ada foto.</p>';
+            return;
+        }
+
+        snapshot.forEach(doc => {
+            const foto = doc.data();
+            grid.innerHTML += `
+                <div style="background:#f8fafc; border-radius:12px; overflow:hidden; box-shadow:0 4px 10px rgba(0,0,0,0.05);">
+                    <img src="${foto.url}" alt="Foto Galeri" style="width:100%; height:140px; object-fit:cover; display:block;">
+                </div>`;
+        });
+    }, error => console.error('Gagal memuat galeri:', error));
+}
+
+muatGaleri(); // jalankan saat halaman dibuka
     </script>
 </body>
 </html>
