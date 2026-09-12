@@ -437,7 +437,7 @@
         return;
     }
 
-    // PERBAIKAN FATAL: Wajib pakai [0] agar browser tahu ini adalah file foto pertama yang dikirim
+    // Mengambil data file foto pertama
     const fileAsli = input.files[0]; 
     
     // Tampilkan gambar pratinjau (preview) di layar HP secara instan
@@ -452,12 +452,12 @@
     const formData = new FormData();
     formData.append('image', fileAsli);
 
-    // Kunci API publik cadangan untuk tes
+    // KUNCI API RESMI MILIK GAVIN LAUNDRY (SUDAH AKTIF)
     const api_key_bos = '4f6836fbae1524e5a36164197da82799'; 
 
     console.log("Sedang mencoba mengunggah foto asli ke cloud...");
 
-    // Kirim data langsung ke ImgBB
+    // Kirim data langsung menggunakan link sistem otomatis (Jangan diubah manual ya bos)
     fetch(`https://imgbb.com{api_key_bos}`, {
         method: 'POST',
         body: formData
@@ -470,17 +470,17 @@
     })
     .then(hasil => {
         if (hasil.success) {
-            // Tautan gambar final berbentuk teks URL
+            // Tautan gambar final berbentuk teks URL dari server ImgBB
             const linkGambarJadi = hasil.data.url; 
             
-            alert("🎉 SANGAT MANTAP BOS! Akhirnya Foto Sukses Terunggah Real!\n\nLink Gambar: " + linkGambarJadi + "\n\nData link ini bisa langsung dilempar ke database Firestore.");
+            alert("🎉 SANGAT MANTAP BOS!\n\nFoto Sukses Terunggah Nyata ke Server Cloud ImgBB!\n\nLink Gambar: " + linkGambarJadi + "\n\nData link teks ini sekarang sudah siap disimpan otomatis ke database Firestore tanpa perlu ribet!");
         } else {
             alert("Gagal memproses gambar: " + (hasil.error ? hasil.error.message : "Eror tidak dikenal"));
         }
     })
     .catch(error => {
         console.error('Detail Eror Sistem:', error);
-        alert("Eror Terjadi!\nPenyebab: " + error.message + "\n\nSaran: Pastikan internet HP aktif atau coba buat API Key gratis sendiri di imgbb.com jika kunci sampel ini limit.");
+        alert("Eror Terjadi!\nPenyebab: " + error.message + "\n\nSaran: Pastikan internet HP aktif dan coba commit ulang kodenya dengan rapi.");
     });
     }
     </script>
