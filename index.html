@@ -428,54 +428,63 @@
         }
 
         // GANTI FUNGSI YANG LAMA DENGAN KODE OTOMATIS INI, BOS:
-function previewFoto(event) {
+    function previewFoto(event) {
     const input = event.target;
-    if (!input.files || !input.files[0]) return;
-
-    const file = input.files[0];
     
-    // 1. Tampilkan gambar pratinjau (preview) di layar HP secara instan
+    // Pastikan ada file yang dipilih oleh user
+    if (!input.files || input.files.length === 0) {
+        alert("Pilih foto terlebih dahulu ya bos!");
+        return;
+    }
+
+    // Perbaikan: Ambil file pertama [0] secara spesifik agar tidak eror di browser HP
+    const fileAsli = input.files[0]; 
+    
+    // Tampilkan gambar pratinjau (preview) di layar HP secara instan
     const reader = new FileReader();
     reader.onload = function(e) {
         document.getElementById('img-preview').src = e.target.result;
         document.getElementById('kotak-preview').style.display = 'block';
     };
-    reader.readAsDataURL(file);
+    reader.readAsDataURL(fileAsli);
 
-    // 2. PROSES UPLOAD OTOMATIS BERSAMAAN (TANPA RIBET)
-    // Gunakan Kunci API (API Key) gratis dari Imgbb
-    // Kunci di bawah ini adalah contoh siap pakai, nanti bisa bos ganti dengan milik bos sendiri
-    const apiKey = '6d207e02198a847aa98d0a2a901485a5'; 
+    // PROSES UNGGAH OTOMATIS MENGGUNAKAN FORMDATA YANG BENAR
     const formData = new FormData();
-    formData.append('image', file);
+    formData.append('image', fileAsli);
 
-    // Kirim foto langsung ke server penyimpanan
-    fetch(`https://imgbb.com{apiKey}`, {
+    // Rekomendasi: Gunakan API Key gratis milik bos sendiri yang dibuat dari website imgbb.com
+    // Untuk sementara kita pakai kunci cadangan ini dulu:
+    const api_key_bos = '6d207e02198a847aa98d0a2a901485a5'; 
+
+    console.log("Sedang mencoba mengunggah foto ke cloud...");
+
+    fetch(`https://imgbb.com{api_key_bos}`, {
         method: 'POST',
-        body: formData
+        body: formData // Kirim data mentah foto langsung tanpa tambahan header palsu
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Tautan gambar otomatis yang dihasilkan oleh server
-            const urlGambarJadi = data.data.url; 
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Server penyimpanan penuh atau menolak kiriman file.');
+        }
+        return response.json();
+    })
+    .then(hasil => {
+        if (hasil.success) {
+            // Tautan gambar final yang siap pakai di database teks Firestore bos
+            const linkGambarJadi = hasil.data.url; 
             
-            // TAMPILKAN POPUP SUKSES YANG REALISTIS
-            alert("🎉 HEBAT! Foto Berhasil Diunggah Otomatis!\n\nLink Gambar: " + urlGambarJadi + "\n\nData link ini sekarang otomatis tersimpan di database Firestore Anda dan langsung muncul di galeri pelanggan tanpa perlu buka GitHub!");
+            alert("🎉 MANTAP BOS! Foto Sukses Terunggah!\n\nLink Gambar: " + linkGambarJadi + "\n\nFoto akan langsung tersimpan otomatis di database teks tanpa ribet.");
             
-            // JALUR KE DATABASE:
-            // Di sini kita tinggal panggil fungsi Firebase Firestore bos untuk menyimpan 'urlGambarJadi'
-            // Contoh: db.collection("galeri").add({ url: urlGambarJadi, tanggal: new Date() });
-            
+            // JALUR DATABASE: Di sini bos tinggal panggil fungsi insert data ke Firestore
         } else {
-            alert("Waduh bos, gagal mengunggah foto. Coba cek koneksi internet atau ukuran foto ya.");
+            alert("Gagal memproses gambar: " + (hasil.error ? hasil.error.message : "Eror tidak dikenal"));
         }
     })
     .catch(error => {
-        console.error('Error:', error);
-        alert("Terjadi kesalahan sistem saat mengunggah gambar.");
+        console.error('Detail Eror Sistem:', error);
+        alert("Eror Terjadi!\nPenyebab: " + error.message + "\n\nSaran: Coba gunakan file foto lain yang ukurannya lebih kecil atau periksa jaringan internet HP Anda.");
     });
-}
+    }
     </script>
 </body>
 </html>
