@@ -431,13 +431,13 @@
     function previewFoto(event) {
     const input = event.target;
     
-    // Pastikan ada file yang dipilih oleh user
+    // Pastikan ada file yang benar-benar dipilih
     if (!input.files || input.files.length === 0) {
         alert("Pilih foto terlebih dahulu ya bos!");
         return;
     }
 
-    // Perbaikan: Ambil file pertama [0] secara spesifik agar tidak eror di browser HP
+    // PERBAIKAN FATAL: Wajib pakai [0] agar browser tahu ini adalah file foto pertama yang dikirim
     const fileAsli = input.files[0]; 
     
     // Tampilkan gambar pratinjau (preview) di layar HP secara instan
@@ -448,41 +448,39 @@
     };
     reader.readAsDataURL(fileAsli);
 
-    // PROSES UNGGAH OTOMATIS MENGGUNAKAN FORMDATA YANG BENAR
+    // Siapkan wadah pengiriman data
     const formData = new FormData();
     formData.append('image', fileAsli);
 
-    // Rekomendasi: Gunakan API Key gratis milik bos sendiri yang dibuat dari website imgbb.com
-    // Untuk sementara kita pakai kunci cadangan ini dulu:
+    // Kunci API publik cadangan untuk tes
     const api_key_bos = '6d207e02198a847aa98d0a2a901485a5'; 
 
-    console.log("Sedang mencoba mengunggah foto ke cloud...");
+    console.log("Sedang mencoba mengunggah foto asli ke cloud...");
 
+    // Kirim data langsung ke ImgBB
     fetch(`https://imgbb.com{api_key_bos}`, {
         method: 'POST',
-        body: formData // Kirim data mentah foto langsung tanpa tambahan header palsu
+        body: formData
     })
     .then(response => {
         if (!response.ok) {
-            throw new Error('Server penyimpanan penuh atau menolak kiriman file.');
+            throw new Error('Jalur koneksi ditolak server atau API Key salah.');
         }
         return response.json();
     })
     .then(hasil => {
         if (hasil.success) {
-            // Tautan gambar final yang siap pakai di database teks Firestore bos
+            // Tautan gambar final berbentuk teks URL
             const linkGambarJadi = hasil.data.url; 
             
-            alert("🎉 MANTAP BOS! Foto Sukses Terunggah!\n\nLink Gambar: " + linkGambarJadi + "\n\nFoto akan langsung tersimpan otomatis di database teks tanpa ribet.");
-            
-            // JALUR DATABASE: Di sini bos tinggal panggil fungsi insert data ke Firestore
+            alert("🎉 SANGAT MANTAP BOS! Akhirnya Foto Sukses Terunggah Real!\n\nLink Gambar: " + linkGambarJadi + "\n\nData link ini bisa langsung dilempar ke database Firestore.");
         } else {
             alert("Gagal memproses gambar: " + (hasil.error ? hasil.error.message : "Eror tidak dikenal"));
         }
     })
     .catch(error => {
         console.error('Detail Eror Sistem:', error);
-        alert("Eror Terjadi!\nPenyebab: " + error.message + "\n\nSaran: Coba gunakan file foto lain yang ukurannya lebih kecil atau periksa jaringan internet HP Anda.");
+        alert("Eror Terjadi!\nPenyebab: " + error.message + "\n\nSaran: Pastikan internet HP aktif atau coba buat API Key gratis sendiri di imgbb.com jika kunci sampel ini limit.");
     });
     }
     </script>
