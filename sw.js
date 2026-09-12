@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gavin-laundry-v16';
+const CACHE_NAME = 'gavin-laundry-v17';
 const ASSETS = [ 'index.html', 'manifest.json', 'public/logo.png', 'public/laundry-bg.jpg' ];
 
 self.addEventListener('install', e => {
