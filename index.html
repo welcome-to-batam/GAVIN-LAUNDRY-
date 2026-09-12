@@ -431,13 +431,13 @@
     function previewFoto(event) {
     const input = event.target;
     
-    // Pastikan ada file yang benar-benar dipilih
+    // Pastikan ada file foto yang dipilih oleh pengguna
     if (!input.files || input.files.length === 0) {
         alert("Pilih foto terlebih dahulu ya bos!");
         return;
     }
 
-    // Mengambil data file foto pertama
+    // PERBAIKAN UTAMA: Wajib pakai [0] agar browser tahu ini file foto pertama
     const fileAsli = input.files[0]; 
     
     // Tampilkan gambar pratinjau (preview) di layar HP secara instan
@@ -448,16 +448,16 @@
     };
     reader.readAsDataURL(fileAsli);
 
-    // Siapkan wadah pengiriman data
+    // Siapkan wadah pengiriman data murni ke cloud
     const formData = new FormData();
     formData.append('image', fileAsli);
 
-    // KUNCI API RESMI MILIK GAVIN LAUNDRY (SUDAH AKTIF)
+    // KUNCI API RESMI MILIK GAVIN LAUNDRY YANG SUDAH AKTIF
     const api_key_bos = '4f6836fbae1524e5a36164197da82799'; 
 
     console.log("Sedang mencoba mengunggah foto asli ke cloud...");
 
-    // Kirim data langsung menggunakan link sistem otomatis (Jangan diubah manual ya bos)
+    // Kirim data menggunakan alamat resmi (Jangan diubah manual ya bos)
     fetch(`https://imgbb.com{api_key_bos}`, {
         method: 'POST',
         body: formData
