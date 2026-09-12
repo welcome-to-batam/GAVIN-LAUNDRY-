@@ -173,8 +173,8 @@
 
     <!-- HEADER DENGAN ANIMASI GRADIENT LUAR BIASA -->
     <header>
-        <div class="logo-container">
-            <img src="public/logo.png" alt="Logo Gavin Laundry" onerror="this.src='https://placeholder.com'">
+        <div class="logo-container" id="logo-admin">
+    <img src="public/logo.png" alt="Logo Gavin Laundry" onerror="this.src='https://placeholder.com'">
         </div>
         <button class="menu-toggle" id="menuToggle">
             <span></span><span></span><span></span>
@@ -251,7 +251,7 @@
             </div>
 
             <!-- TAMPILAN PANEL UPLOAD ALA FACEBOOK MARKETPLACE (UNTUK ADMIN/PEMILIK) -->
-            <div style="background: #f0fdfa; border: 2px dashed #0ea5e9; border-radius: 16px; padding: 20px 15px; margin-bottom: 20px; text-align: center;">
+            <div id="panel-upload" style="display: none; background: #f0fdfa; border: 2px dashed #0ea5e9; border-radius: 16px; padding: 20px 15px; margin-bottom: 20px; text-align: center;">
                 <h4 style="color: #0369a1; font-size: 1rem; margin-bottom: 5px;">📸 Tambah Foto Galeri</h4>
                 <p style="color: #0284c7; font-size: 0.8rem; margin-bottom: 15px;">Unggah foto hasil cuci/setrika agar dilihat pelanggan</p>
                 
@@ -261,12 +261,17 @@
                 </label>
                 <input type="file" id="input-foto-laundry" accept="image/*" style="display: none;" onchange="previewFoto(event)">
                 
-                <!-- Kotak Kecil untuk Intip Foto Sebelum Diupload -->
-                <div id="kotak-preview" style="display: none; margin-top: 10px;">
-                    <img id="img-preview" src="#" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 2px solid #0ea5e9;">
-                    <p style="color: #64748b; font-size: 0.75rem; margin-top: 4px;">Foto siap diunggah!</p>
-                </div>
-            </div>
+            <!-- Kotak Kecil untuk Intip Foto Sebelum Diupload -->
+<div id="kotak-preview" style="display: none; margin-top: 10px;">
+    <img id="img-preview" src="#" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 2px solid #0ea5e9;">
+    <p style="color: #64748b; font-size: 0.75rem; margin-top: 4px;">Foto siap diunggah!</p>
+</div>
+
+<!-- TOMBOL KELUAR (BARU) -->
+<button onclick="logoutAdmin()" style="margin-top: 10px; background: #94a3b8; color: white; border: none; padding: 8px 18px; border-radius: 50px; font-weight: 600; font-size: 0.8rem;">
+    🚪 Keluar Mode Admin
+</button>
+        </div>
 
             <!-- Tombol Kembali -->
             <a href="#" class="back-btn" onclick="bukaHalaman('beranda')">⬅️ Kembali ke Beranda</a>
@@ -391,6 +396,7 @@
 
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 
     <!-- SCRIPT JAVASCRIPT UNTUK NAVIGASI DAN PWA -->
     <script>
@@ -404,6 +410,54 @@
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+
+        // ===== MODE ADMIN: PANEL MUNCUL HANYA JIKA SUDAH LOGIN =====
+firebase.auth().onAuthStateChanged(function(user) {
+    const panel = document.getElementById('panel-upload');
+    if (user) {
+        panel.style.display = 'block';   // admin login → panel muncul
+    } else {
+        panel.style.display = 'none';    // pengunjung biasa → tersembunyi
+    }
+});
+
+// ===== PINTU RAHASIA: TAP LOGO 5 KALI DALAM 2 DETIK =====
+let hitungTap = 0;
+let timerTap;
+
+document.getElementById('logo-admin').addEventListener('click', function() {
+    hitungTap++;
+    clearTimeout(timerTap);
+    timerTap = setTimeout(function() { hitungTap = 0; }, 2000);
+
+    if (hitungTap >= 5) {
+        hitungTap = 0;
+        if (!firebase.auth().currentUser) {
+            loginAdmin();
+        }
+    }
+});
+
+function loginAdmin() {
+    const email = prompt('Email admin:');
+    if (!email) return;
+    const sandi = prompt('Password:');
+    if (!sandi) return;
+
+    firebase.auth().signInWithEmailAndPassword(email, sandi)
+        .then(function() {
+            alert('Login berhasil! Panel upload sudah aktif.');
+        })
+        .catch(function(err) {
+            alert('Login gagal: ' + err.message);
+        });
+}
+
+function logoutAdmin() {
+    firebase.auth().signOut().then(function() {
+        alert('Anda telah keluar dari mode admin.');
+    });
+}
         
         // Logika Laci Menu Buka/Tutup
         const menuToggle = document.getElementById('menuToggle');
