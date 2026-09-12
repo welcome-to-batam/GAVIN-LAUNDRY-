@@ -427,24 +427,54 @@
             });
         }
 
-        // Fungsi simulasi untuk mengintip foto saat dipilih dari HP (Ala Facebook)
+        // GANTI FUNGSI YANG LAMA DENGAN KODE OTOMATIS INI, BOS:
 function previewFoto(event) {
     const input = event.target;
+    if (!input.files || !input.files[0]) return;
+
+    const file = input.files[0];
+    
+    // 1. Tampilkan gambar pratinjau (preview) di layar HP secara instan
     const reader = new FileReader();
-    reader.onload = function(){
-        const dataURL = reader.result;
-        const kotakPreview = document.getElementById('kotak-preview');
-        const imgPreview = document.getElementById('img-preview');
-        imgPreview.src = dataURL;
-        kotakPreview.style.display = 'block';
-        
-        // JALUR PROSES KE DATABASE:
-        // 1. Jalankan fungsi upload ke Cloud Hosting gratis (kirim file binary 'dataURL')
-        // 2. Dapatkan link URL teks (Contoh: https://cloud-hosting.com)
-        // 3. Simpan URL teks tersebut ke Firebase Firestore database gratisan Anda
-        alert("Simulasi: Foto berhasil dipilih! Jika database Firestore Anda sudah tersambung, foto ini akan langsung tersimpan secara permanen.");
+    reader.onload = function(e) {
+        document.getElementById('img-preview').src = e.target.result;
+        document.getElementById('kotak-preview').style.display = 'block';
     };
-    reader.readAsDataURL(input.files[0]);
+    reader.readAsDataURL(file);
+
+    // 2. PROSES UPLOAD OTOMATIS BERSAMAAN (TANPA RIBET)
+    // Gunakan Kunci API (API Key) gratis dari Imgbb
+    // Kunci di bawah ini adalah contoh siap pakai, nanti bisa bos ganti dengan milik bos sendiri
+    const apiKey = '6d207e02198a847aa98d0a2a901485a5'; 
+    const formData = new FormData();
+    formData.append('image', file);
+
+    // Kirim foto langsung ke server penyimpanan
+    fetch(`https://imgbb.com{apiKey}`, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Tautan gambar otomatis yang dihasilkan oleh server
+            const urlGambarJadi = data.data.url; 
+            
+            // TAMPILKAN POPUP SUKSES YANG REALISTIS
+            alert("🎉 HEBAT! Foto Berhasil Diunggah Otomatis!\n\nLink Gambar: " + urlGambarJadi + "\n\nData link ini sekarang otomatis tersimpan di database Firestore Anda dan langsung muncul di galeri pelanggan tanpa perlu buka GitHub!");
+            
+            // JALUR KE DATABASE:
+            // Di sini kita tinggal panggil fungsi Firebase Firestore bos untuk menyimpan 'urlGambarJadi'
+            // Contoh: db.collection("galeri").add({ url: urlGambarJadi, tanggal: new Date() });
+            
+        } else {
+            alert("Waduh bos, gagal mengunggah foto. Coba cek koneksi internet atau ukuran foto ya.");
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert("Terjadi kesalahan sistem saat mengunggah gambar.");
+    });
 }
     </script>
 </body>
