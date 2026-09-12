@@ -278,14 +278,52 @@
         </div>
     </div>
 
-    <!-- HALAMAN TESTIMONI -->
-    <div id="testimoni" class="page-content">
-        <div class="custom-page-box">
-            <h1 class="custom-page-title">Testimoni</h1>
-            <p class="custom-page-desc">Apa kata mereka? Halaman ini berisi ulasan kepuasan dari para pelanggan setia GAVIN LAUNDRY.</p>
-            <a href="#" class="back-btn" onclick="bukaHalaman('beranda')">⬅️ Kembali</a>
+    <!-- HALAMAN TESTIMONI (VERSI AKTIF) -->
+<div id="testimoni" class="page-content">
+    <div class="custom-page-box" style="padding: 24px 16px;">
+        <h1 class="custom-page-title">Testimoni</h1>
+        <p style="text-align: center; color: #64748b; font-size: 0.95rem; margin-bottom: 20px; line-height: 1.5;">Apa kata mereka? Ini cerita nyata para pelanggan setia GAVIN LAUNDRY.</p>
+
+        <!-- DAFTAR TESTIMONI (otomatis dari database) -->
+        <div id="daftar-testimoni" style="margin-bottom: 24px;">
+            <p style="color:#94a3b8; text-align:center; font-size:0.9rem;">Memuat testimoni...</p>
         </div>
+
+        <!-- ANTRIAN PERSETUJUAN (hanya terlihat admin) -->
+        <div id="panel-pending-testimoni" style="display: none; background: #fffbeb; border: 2px dashed #f59e0b; border-radius: 16px; padding: 16px; margin-bottom: 20px;">
+            <h3 style="color:#92400e; font-size:0.95rem; margin-bottom:10px;">⏳ Menunggu Persetujuan</h3>
+            <div id="daftar-pending"></div>
+        </div>
+
+        <!-- FORM ULASAN UNTUK PELANGGAN -->
+        <div style="background: #f0fdfa; border: 2px dashed #0ea5e9; border-radius: 16px; padding: 20px 15px; text-align: center; margin-bottom: 16px;">
+            <h4 style="color: #0369a1; font-size: 1rem; margin-bottom: 5px;">✍️ Tulis Testimoni Anda</h4>
+            <p style="color: #0284c7; font-size: 0.8rem; margin-bottom: 15px;">Puas dengan layanan kami? Ulasan Anda sangat berarti!</p>
+
+            <input type="text" id="input-nama-testimoni" placeholder="Nama Anda" maxlength="40"
+                style="width: 100%; box-sizing: border-box; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; margin-bottom: 12px; font-size: 0.95rem;">
+
+            <div style="margin-bottom: 4px;">
+                <span id="bintang-1" onclick="pilihRating(1)" style="font-size: 1.8rem; cursor: pointer;">⭐</span>
+                <span id="bintang-2" onclick="pilihRating(2)" style="font-size: 1.8rem; cursor: pointer;">⭐</span>
+                <span id="bintang-3" onclick="pilihRating(3)" style="font-size: 1.8rem; cursor: pointer;">⭐</span>
+                <span id="bintang-4" onclick="pilihRating(4)" style="font-size: 1.8rem; cursor: pointer;">⭐</span>
+                <span id="bintang-5" onclick="pilihRating(5)" style="font-size: 1.8rem; cursor: pointer;">⭐</span>
+            </div>
+            <p style="color:#94a3b8; font-size:0.7rem; margin-bottom: 12px;">Ketuk bintang untuk memberi nilai</p>
+
+            <textarea id="input-pesan-testimoni" placeholder="Ceritakan pengalaman Anda..." maxlength="500" rows="3"
+                style="width: 100%; box-sizing: border-box; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; margin-bottom: 12px; font-size: 0.95rem; resize: vertical;"></textarea>
+
+            <button onclick="kirimTestimoni()"
+                style="background-color: #0ea5e9; color: white; border: none; padding: 12px 24px; border-radius: 50px; font-weight: 600; font-size: 0.9rem; box-shadow: 0 4px 10px rgba(14,165,233,0.2);">
+                📨 Kirim Testimoni
+            </button>
+        </div>
+
+        <a href="#" class="back-btn" onclick="bukaHalaman('beranda')">⬅️ Kembali ke Beranda</a>
     </div>
+</div>
 
         <!-- HALAMAN TENTANG KAMI (VERSI PRESTIGE & MODERN) -->
     <div id="tentang" class="page-content">
@@ -604,6 +642,138 @@ function hapusFoto(idFoto) {
 }
 
 muatGaleri(); // jalankan saat halaman dibuka
+
+        // ===== TESTIMONI PELANGGAN =====
+let dataTestimoni = null;
+let ratingDipilih = 5;
+
+function muatTestimoni() {
+    db.collection('testimoni').onSnapshot(snapshot => {
+        dataTestimoni = snapshot;
+        renderTestimoni();
+    }, error => console.error('Gagal memuat testimoni:', error));
+}
+
+function renderTestimoni() {
+    if (!dataTestimoni) return;
+
+    const wadah = document.getElementById('daftar-testimoni');
+    if (!wadah) return;
+
+    // Urutkan terbaru dulu (sort di browser agar tidak perlu index Firestore)
+    const semua = dataTestimoni.docs.slice().sort((a, b) => {
+        const ta = a.data().waktu ? a.data().waktu.toMillis() : 0;
+        const tb = b.data().waktu ? b.data().waktu.toMillis() : 0;
+        return tb - ta;
+    });
+
+    const disetujui = semua.filter(d => d.data().disetujui === true);
+    const menunggu  = semua.filter(d => d.data().disetujui === false);
+
+    // 1. Daftar testimoni publik
+    wadah.innerHTML = '';
+    if (disetujui.length === 0) {
+        wadah.innerHTML = '<p style="color:#94a3b8; text-align:center; font-size:0.9rem;">Belum ada testimoni. Jadilah yang pertama! 😊</p>';
+    } else {
+        disetujui.forEach(doc => {
+            wadah.innerHTML += kartuTestimoni(doc, true);
+        });
+    }
+
+    // 2. Antrian persetujuan (hanya muncul saat login admin)
+    const panelPending = document.getElementById('panel-pending-testimoni');
+    const wadahPending = document.getElementById('daftar-pending');
+    if (panelPending && wadahPending) {
+        wadahPending.innerHTML = '';
+        if (adminAktif && menunggu.length > 0) {
+            panelPending.style.display = 'block';
+            menunggu.forEach(doc => {
+                wadahPending.innerHTML += kartuTestimoni(doc, false);
+            });
+        } else {
+            panelPending.style.display = 'none';
+        }
+    }
+}
+
+function kartuTestimoni(doc, sudahDisetujui) {
+    const t = doc.data();
+    const bintang = '⭐'.repeat(t.rating || 5);
+
+    let tombolAdmin = '';
+    if (adminAktif) {
+        if (!sudahDisetujui) {
+            tombolAdmin = `
+                <div style="margin-top: 10px;">
+                    <button onclick="setujuiTestimoni('${doc.id}')" style="background:#22c55e; color:white; border:none; padding:8px 16px; border-radius:50px; font-weight:600; font-size:0.8rem; margin-right:6px;">✅ Setujui</button>
+                    <button onclick="hapusTestimoni('${doc.id}')" style="background:#ef4444; color:white; border:none; padding:8px 16px; border-radius:50px; font-weight:600; font-size:0.8rem;">🗑️ Hapus</button>
+                </div>`;
+        } else {
+            tombolAdmin = `
+                <div style="margin-top: 10px;">
+                    <button onclick="hapusTestimoni('${doc.id}')" style="background:#ef4444; color:white; border:none; padding:8px 16px; border-radius:50px; font-weight:600; font-size:0.8rem;">🗑️ Hapus</button>
+                </div>`;
+        }
+    }
+
+    return `
+        <div style="background:#ffffff; border-radius:12px; padding:14px; margin-bottom:12px; box-shadow:0 2px 8px rgba(0,0,0,0.06); border-left:4px solid #f59e0b;">
+            <div style="font-size:0.85rem; letter-spacing:2px;">${bintang}</div>
+            <p style="color:#334155; font-size:0.92rem; line-height:1.55; margin:8px 0;">"${escapeHTML(t.pesan)}"</p>
+            <p style="color:#64748b; font-size:0.8rem; font-weight:700;">— ${escapeHTML(t.nama)}</p>
+            ${tombolAdmin}
+        </div>`;
+}
+
+function pilihRating(n) {
+    ratingDipilih = n;
+    for (let i = 1; i <= 5; i++) {
+        document.getElementById('bintang-' + i).style.opacity = (i <= n) ? '1' : '0.25';
+    }
+}
+
+function kirimTestimoni() {
+    const nama = document.getElementById('input-nama-testimoni').value.trim();
+    const pesan = document.getElementById('input-pesan-testimoni').value.trim();
+
+    if (nama.length < 2)  { alert('Isi nama dulu ya 😊'); return; }
+    if (pesan.length < 5) { alert('Tulis pesan testimoni dulu ya 😊'); return; }
+
+    db.collection('testimoni').add({
+        nama: nama,
+        pesan: pesan,
+        rating: ratingDipilih,
+        disetujui: false,
+        waktu: firebase.firestore.FieldValue.serverTimestamp()
+    })
+    .then(() => {
+        alert('Terima kasih! 🙏\n\nTestimoni Anda akan tampil setelah disetujui admin.');
+        document.getElementById('input-nama-testimoni').value = '';
+        document.getElementById('input-pesan-testimoni').value = '';
+        pilihRating(5);
+    })
+    .catch(err => alert('Gagal mengirim: ' + err.message));
+}
+
+function setujuiTestimoni(id) {
+    db.collection('testimoni').doc(id).update({ disetujui: true })
+        .catch(err => alert('Gagal: ' + err.message));
+}
+
+function hapusTestimoni(id) {
+    if (!confirm('Hapus testimoni ini?')) return;
+    db.collection('testimoni').doc(id).delete()
+        .catch(err => alert('Gagal: ' + err.message));
+}
+
+// Pelindung: teks pelanggan di-escape agar tidak bisa menyuntik kode jahat
+function escapeHTML(teks) {
+    const div = document.createElement('div');
+    div.textContent = teks;
+    return div.innerHTML;
+}
+
+muatTestimoni();
     </script>
 </body>
 </html>
