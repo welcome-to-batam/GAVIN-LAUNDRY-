@@ -236,12 +236,40 @@
         </div>
     </div>
             
-    <!-- HALAMAN GALERY -->
+        <!-- HALAMAN GALERY (VERSI DINAMIS & SIMPEL ALA FACEBOOK MARKETPLACE) -->
     <div id="galery" class="page-content">
-        <div class="custom-page-box">
-            <h1 class="custom-page-title">Galery</h1>
-            <p class="custom-page-desc">Halaman ini menampilkan foto-foto tempat usaha, mesin cuci modern, dan hasil setrika rapi GAVIN LAUNDRY Anda.</p>
-            <a href="#" class="back-btn" onclick="bukaHalaman('beranda')">⬅️ Kembali</a>
+        <div class="custom-page-box" style="padding: 24px 16px;">
+            <h1 class="custom-page-title">Galery Foto</h1>
+            <p style="color: #64748b; font-size: 0.95rem; margin-bottom: 20px; line-height: 1.5;">Dokumentasi hasil pengerjaan bersih dan suasana workshop GAVIN LAUNDRY.</p>
+            
+            <!-- Tempat Foto Muncul Otomatis dari Database -->
+            <div id="grid-galeri-dinamis" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 24px;">
+                <!-- Foto-foto dari database akan masuk ke sini otomatis lewat JavaScript -->
+                <div style="background: #f8fafc; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); grid-column: span 2; padding: 30px 10px;">
+                    <p style="color: #94a3b8; font-size: 0.9rem;">Belum ada foto. Silakan unggah foto pertama Anda di bawah!</p>
+                </div>
+            </div>
+
+            <!-- TAMPILAN PANEL UPLOAD ALA FACEBOOK MARKETPLACE (UNTUK ADMIN/PEMILIK) -->
+            <div style="background: #f0fdfa; border: 2px dashed #0ea5e9; border-radius: 16px; padding: 20px 15px; margin-bottom: 20px; text-align: center;">
+                <h4 style="color: #0369a1; font-size: 1rem; margin-bottom: 5px;">📸 Tambah Foto Galeri</h4>
+                <p style="color: #0284c7; font-size: 0.8rem; margin-bottom: 15px;">Unggah foto hasil cuci/setrika agar dilihat pelanggan</p>
+                
+                <!-- Tombol Pilih File yang Familiar bagi Orang Awam -->
+                <label for="input-foto-laundry" style="display: inline-block; background-color: #0ea5e9; color: white; padding: 10px 20px; border-radius: 8px; font-weight: 650; font-size: 0.9rem; cursor: pointer; margin-bottom: 10px; box-shadow: 0 4px 10px rgba(14, 165, 233, 0.2);">
+                    ➕ Pilih Foto dari HP
+                </label>
+                <input type="file" id="input-foto-laundry" accept="image/*" style="display: none;" onchange="previewFoto(event)">
+                
+                <!-- Kotak Kecil untuk Intip Foto Sebelum Diupload -->
+                <div id="kotak-preview" style="display: none; margin-top: 10px;">
+                    <img id="img-preview" src="#" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 2px solid #0ea5e9;">
+                    <p style="color: #64748b; font-size: 0.75rem; margin-top: 4px;">Foto siap diunggah!</p>
+                </div>
+            </div>
+
+            <!-- Tombol Kembali -->
+            <a href="#" class="back-btn" onclick="bukaHalaman('beranda')">⬅️ Kembali ke Beranda</a>
         </div>
     </div>
 
@@ -360,7 +388,7 @@
             <a href="#" class="back-btn" onclick="bukaHalaman('beranda')" style="margin-top: 10px;">⬅️ Kembali ke Beranda</a>
         </div>
     </div>
-    
+
     <!-- SCRIPT JAVASCRIPT UNTUK NAVIGASI DAN PWA -->
     <script>
         // Logika Laci Menu Buka/Tutup
@@ -398,6 +426,26 @@
                 navigator.serviceWorker.register('sw.js');
             });
         }
+
+        // Fungsi simulasi untuk mengintip foto saat dipilih dari HP (Ala Facebook)
+function previewFoto(event) {
+    const input = event.target;
+    const reader = new FileReader();
+    reader.onload = function(){
+        const dataURL = reader.result;
+        const kotakPreview = document.getElementById('kotak-preview');
+        const imgPreview = document.getElementById('img-preview');
+        imgPreview.src = dataURL;
+        kotakPreview.style.display = 'block';
+        
+        // JALUR PROSES KE DATABASE:
+        // 1. Jalankan fungsi upload ke Cloud Hosting gratis (kirim file binary 'dataURL')
+        // 2. Dapatkan link URL teks (Contoh: https://cloud-hosting.com)
+        // 3. Simpan URL teks tersebut ke Firebase Firestore database gratisan Anda
+        alert("Simulasi: Foto berhasil dipilih! Jika database Firestore Anda sudah tersambung, foto ini akan langsung tersimpan secara permanen.");
+    };
+    reader.readAsDataURL(input.files[0]);
+}
     </script>
 </body>
 </html>
