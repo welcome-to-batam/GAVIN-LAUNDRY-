@@ -411,16 +411,21 @@
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-        // ===== MODE ADMIN: PANEL MUNCUL HANYA JIKA SUDAH LOGIN =====
+        // ===== MODE ADMIN =====
+let adminAktif = false;
+
 firebase.auth().onAuthStateChanged(function(user) {
     const panel = document.getElementById('panel-upload');
     if (user) {
-        panel.style.display = 'block';   // admin login → panel muncul
+        adminAktif = true;
+        panel.style.display = 'block';
     } else {
-        panel.style.display = 'none';    // pengunjung biasa → tersembunyi
+        adminAktif = false;
+        panel.style.display = 'none';
     }
+    renderGaleri(); // refresh tampilan: tombol hapus ikut muncul/hilang
 });
-
+        
 // ===== PINTU RAHASIA: TAP LOGO 5 KALI DALAM 2 DETIK =====
 let hitungTap = 0;
 let timerTap;
@@ -553,25 +558,49 @@ fetch(`https://api.imgbb.com/1/upload?key=${api_key_bos}`, {
 });
     }
 
+// ===== GALERI: DATA + RENDER + HAPUS =====
+let dataGaleri = null; // tempat menampung foto terbaru dari database
+
 function muatGaleri() {
-    const grid = document.getElementById('grid-galeri-dinamis');
-
     db.collection('galeri').orderBy('waktu', 'desc').onSnapshot(snapshot => {
-        grid.innerHTML = ''; // hapus tulisan "Belum ada foto"
-
-        if (snapshot.empty) {
-            grid.innerHTML = '<p style="color:#94a3b8; text-align:center; grid-column:span 2;">Belum ada foto.</p>';
-            return;
-        }
-
-        snapshot.forEach(doc => {
-            const foto = doc.data();
-            grid.innerHTML += `
-                <div style="background:#f8fafc; border-radius:12px; overflow:hidden; box-shadow:0 4px 10px rgba(0,0,0,0.05);">
-                    <img src="${foto.url}" alt="Foto Galeri" style="width:100%; height:140px; object-fit:cover; display:block;">
-                </div>`;
-        });
+        dataGaleri = snapshot;
+        renderGaleri();
     }, error => console.error('Gagal memuat galeri:', error));
+}
+
+function renderGaleri() {
+    if (!dataGaleri) return; // data belum tiba, tunggu snapshot pertama
+
+    const grid = document.getElementById('grid-galeri-dinamis');
+    grid.innerHTML = '';
+
+    if (dataGaleri.empty) {
+        grid.innerHTML = '<p style="color:#94a3b8; text-align:center; grid-column:span 2;">Belum ada foto.</p>';
+        return;
+    }
+
+    dataGaleri.forEach(doc => {
+        const foto = doc.data();
+        const idFoto = doc.id;
+
+        // Tombol hapus hanya dirender kalau sedang login admin
+        const tombolHapus = adminAktif
+            ? `<button onclick="hapusFoto('${idFoto}')" style="position:absolute; top:8px; right:8px; background:#ef4444; color:white; border:none; border-radius:50%; width:36px; height:36px; font-size:1rem; box-shadow:0 2px 8px rgba(0,0,0,0.35);">🗑️</button>`
+            : '';
+
+        grid.innerHTML += `
+            <div style="background:#f8fafc; border-radius:12px; overflow:hidden; box-shadow:0 4px 10px rgba(0,0,0,0.05); position:relative;">
+                <img src="${foto.url}" alt="Foto Galeri" style="width:100%; height:140px; object-fit:cover; display:block;">
+                ${tombolHapus}
+            </div>`;
+    });
+}
+
+function hapusFoto(idFoto) {
+    if (!confirm('Hapus foto ini dari galeri?')) return;
+
+    db.collection('galeri').doc(idFoto).delete()
+        .catch(err => alert('Gagal hapus: ' + err.message));
 }
 
 muatGaleri(); // jalankan saat halaman dibuka
