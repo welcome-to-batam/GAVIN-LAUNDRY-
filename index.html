@@ -857,6 +857,8 @@ function kirimTestimoni() {
         document.getElementById('input-pesan-testimoni').value = '';
         pilihRating(5);
     })
+    .catch(err => alert('Gagal mengirim: ' + err.message));
+}
 
         // ===== NOTIFIKASI KE HP ADMIN via WORKER → NTFY =====
         return fetch('https://gavin-laundry.cowokperenung.workers.dev/notify', {
