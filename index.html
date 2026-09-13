@@ -628,17 +628,14 @@ function logoutAdmin() {
         // GANTI FUNGSI YANG LAMA DENGAN KODE OTOMATIS INI, BOS:
     function previewFoto(event) {
     const input = event.target;
-    
-    // Pastikan ada file foto yang dipilih oleh pengguna
+
     if (!input.files || input.files.length === 0) {
         alert("Pilih foto terlebih dahulu ya bos!");
         return;
     }
 
-    // PERBAIKAN UTAMA: Wajib pakai [0] agar browser tahu ini file foto pertama
-    const fileAsli = input.files[0]; 
-    
-    // Tampilkan gambar pratinjau (preview) di layar HP secara instan
+    const fileAsli = input.files[0];
+
     const reader = new FileReader();
     reader.onload = function(e) {
         document.getElementById('img-preview').src = e.target.result;
@@ -646,40 +643,40 @@ function logoutAdmin() {
     };
     reader.readAsDataURL(fileAsli);
 
-    // Siapkan wadah pengiriman data
-const formData = new FormData();
-formData.append('image', fileAsli);
+    const formData = new FormData();
+    formData.append('image', fileAsli);
 
-console.log("Sedang mencoba mengunggah foto ke cloud...");
-        
-fetch('https://gavin-laundry.cowokperenung.workers.dev', {
-    method: 'POST',
-    body: formData
-})
-.then(response => {
-    if (!response.ok) {
-        throw new Error('Jalur koneksi ditolak server atau API Key salah.');
-    }
-    return response.json();
-})
-.then(hasil => {
-    if (!hasil.success) {
-        throw new Error(hasil.error ? hasil.error.message : "Eror tidak dikenal");
-    }
-    // SIMPAN LINK FOTO KE DATABASE FIRESTORE
-    return db.collection('galeri').add({
-        url: hasil.data.url,
-        waktu: firebase.firestore.FieldValue.serverTimestamp()
+    console.log("Sedang mencoba mengunggah foto ke cloud...");
+
+    fetch('https://gavin-laundry.cowokperenung.workers.dev', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Jalur koneksi ditolak server atau API Key salah.');
+        }
+        return response.json();
+    })
+    .then(hasil => {
+        if (hasil.success) {
+            const linkGambarJadi = hasil.data.url;
+            return db.collection('galeri').add({
+                url: linkGambarJadi,
+                waktu: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        } else {
+            throw new Error(hasil.error ? hasil.error.message : "Eror tidak dikenal");
+        }
+    })
+    .then(() => {
+        alert("🎉 Foto sukses terunggah & langsung tampil di galeri!");
+    })
+    .catch(error => {
+        console.error('Detail Eror:', error);
+        alert("Eror Terjadi!\nPenyebab: " + error.message);
     });
-})
-.then(() => {
-    alert("🎉 Foto sukses terunggah & langsung tampil di galeri!");
-})
-.catch(error => {
-    console.error('Detail Eror:', error);
-    alert("Eror Terjadi!\nPenyebab: " + error.message);
-});
-    }
+}
 
 // ===== GALERI: DATA + RENDER + HAPUS =====
 let dataGaleri = null; // tempat menampung foto terbaru dari database
@@ -845,7 +842,7 @@ function kirimTestimoni() {
         waktu: firebase.firestore.FieldValue.serverTimestamp()
     })
     .then(() => {
-        // NOTIFIKASI DIKIRIM DULU — jangan sampai diblokir alert / tab ditutup
+        // NOTIFIKASI DIKIRIM DULU — sebelum alert membekukan JavaScript
         fetch('https://gavin-laundry.cowokperenung.workers.dev/notify', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
