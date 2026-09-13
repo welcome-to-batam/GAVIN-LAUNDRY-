@@ -845,10 +845,18 @@ function kirimTestimoni() {
         waktu: firebase.firestore.FieldValue.serverTimestamp()
     })
     .then(() => {
+        // NOTIFIKASI DIKIRIM DULU — jangan sampai diblokir alert / tab ditutup
+        fetch('https://gavin-laundry.cowokperenung.workers.dev/notify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nama: nama, rating: ratingDipilih, pesan: pesan })
+        }).catch(() => null);
+
         alert('Terima kasih! 🙏\n\nTestimoni Anda akan tampil setelah disetujui admin.');
         document.getElementById('input-nama-testimoni').value = '';
         document.getElementById('input-pesan-testimoni').value = '';
         pilihRating(5);
+    })
 
         // ===== NOTIFIKASI KE HP ADMIN via WORKER → NTFY =====
         return fetch('https://gavin-laundry.cowokperenung.workers.dev/notify', {
