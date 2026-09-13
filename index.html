@@ -650,11 +650,9 @@ function logoutAdmin() {
 const formData = new FormData();
 formData.append('image', fileAsli);
 
-const api_key_bos = '4f6836fbae1524e5a36164197da82799';
-
 console.log("Sedang mencoba mengunggah foto ke cloud...");
-
-fetch(`https://api.imgbb.com/1/upload?key=${api_key_bos}`, {
+        
+fetch('https://gavin-laundry.cowokperenung.workers.dev', {
     method: 'POST',
     body: formData
 })
@@ -851,9 +849,16 @@ function kirimTestimoni() {
         document.getElementById('input-nama-testimoni').value = '';
         document.getElementById('input-pesan-testimoni').value = '';
         pilihRating(5);
+
+        // ===== NOTIFIKASI KE HP ADMIN via WORKER → NTFY =====
+        return fetch('https://gavin-laundry.cowokperenung.workers.dev/notify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nama: nama, rating: ratingDipilih, pesan: pesan })
+        }).catch(() => null); // kalau notif gagal, pengirim tetap tidak terganggu
     })
     .catch(err => alert('Gagal mengirim: ' + err.message));
-}
+    }
 
 function setujuiTestimoni(id) {
     db.collection('testimoni').doc(id).update({ disetujui: true })
