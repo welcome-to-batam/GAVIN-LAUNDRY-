@@ -176,8 +176,9 @@
         <div class="logo-container" id="logo-admin">
     <img src="public/logo.png" alt="Logo Gavin Laundry" onerror="this.src='https://placeholder.com'">
         </div>
-        <button class="menu-toggle" id="menuToggle">
-            <span></span><span></span><span></span>
+        <button class="menu-toggle" id="menuToggle" style="position: relative;">
+    <span></span><span></span><span></span>
+    <span id="badge-testi" style="display: none; position: absolute; top: -6px; right: -6px; background: #ef4444; color: white; font-size: 0.7rem; font-weight: 700; min-width: 20px; height: 20px; border-radius: 10px; align-items: center; justify-content: center;">0</span>
         </button>
     </header>
 
@@ -669,6 +670,19 @@ function renderTestimoni() {
 
     const disetujui = semua.filter(d => d.data().disetujui === true);
     const menunggu  = semua.filter(d => d.data().disetujui === false);
+    
+    // BADGE ADMIN: angka merah di tombol menu + judul tab
+const badge = document.getElementById('badge-testi');
+if (badge) {
+    if (adminAktif && menunggu.length > 0) {
+        badge.textContent = menunggu.length;
+        badge.style.display = 'flex';
+        document.title = `🔔 (${menunggu.length}) Gavin Laundry`;
+    } else {
+        badge.style.display = 'none';
+        document.title = 'Gavin Laundry';
+    }
+}
 
     // 1. Daftar testimoni publik
     wadah.innerHTML = '';
