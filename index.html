@@ -833,7 +833,7 @@ function pilihRating(n) {
     }
 }
 
-function kirimTestimoni() {
+ function kirimTestimoni() {
     const nama = document.getElementById('input-nama-testimoni').value.trim();
     const pesan = document.getElementById('input-pesan-testimoni').value.trim();
 
@@ -848,7 +848,7 @@ function kirimTestimoni() {
         waktu: firebase.firestore.FieldValue.serverTimestamp()
     })
     .then(() => {
-        // NOTIFIKASI DIKIRIM DULU — sebelum alert membekukan JavaScript
+        // Notif dikirim DULU sebelum alert membekukan JavaScript
         fetch('https://gavin-laundry.cowokperenung.workers.dev/notify', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -861,7 +861,7 @@ function kirimTestimoni() {
         pilihRating(5);
     })
     .catch(err => alert('Gagal mengirim: ' + err.message));
-}
+ }
 
         // ===== NOTIFIKASI KE HP ADMIN via WORKER → NTFY =====
         return fetch('https://gavin-laundry.cowokperenung.workers.dev/notify', {
