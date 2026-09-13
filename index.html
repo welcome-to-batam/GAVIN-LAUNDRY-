@@ -228,14 +228,100 @@
 
     <!-- ================= 3. HALAMAN BARU OTOMATIS (Bisa Anda Edit Nanti) ================= -->
     
-    <!-- HALAMAN MELAYANI -->
-    <div id="melayani" class="page-content">
-        <div class="custom-page-box">
-            <h1 class="custom-page-title">Melayani</h1>
-            <p class="custom-page-desc">Halaman ini berisi daftar layanan GAVIN LAUNDRY. (Contoh: Cuci Kiloan, Cuci Satuan, Bedcover, Sepatu, Boneka, dll).</p>
-            <a href="#" class="back-btn" onclick="bukaHalaman('beranda')">⬅️ Kembali</a>
+    <!-- HALAMAN MELAYANI (VERSI LENGKAP & MUDAH EDIT) -->
+<div id="melayani" class="page-content">
+    <style>
+        .layanan-chip { display: inline-flex; align-items: center; background: #f0fdfa; border: 1px solid #a5f3fc; color: #0e7490; padding: 7px 13px; border-radius: 50px; font-size: 0.8rem; font-weight: 600; margin: 3px 2px; }
+        .harga-grup-title { color: #1e293b; font-size: 0.95rem; font-weight: 700; margin: 18px 0 4px 0; padding-bottom: 6px; border-bottom: 2px solid #e0f2fe; }
+        .harga-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px dashed #e2e8f0; }
+        .harga-row:last-child { border-bottom: none; }
+        .harga-row .nama { color: #334155; font-size: 0.88rem; font-weight: 600; }
+        .harga-row .harga { color: #0284c7; font-weight: 800; font-size: 0.88rem; white-space: nowrap; margin-left: 12px; }
+    </style>
+
+    <div class="custom-page-box" style="padding: 24px 16px;">
+        <h1 class="custom-page-title">Melayani</h1>
+        <p style="text-align: center; color: #64748b; font-size: 0.95rem; margin-bottom: 20px; line-height: 1.5;">
+            "Bersih, Wangi, Rapi — Puas di Hati!" 🧼
+        </p>
+
+        <!-- ================= DAFTAR LAYANAN ================= -->
+        <div style="text-align: center; margin-bottom: 24px;">
+            <div style="color:#1e293b; font-weight:800; font-size:1rem; margin-bottom:10px;">📋 GAVIN LAUNDRY MELAYANI</div>
+            <span class="layanan-chip">✅ Cuci pakaian</span>
+            <span class="layanan-chip">✅ Cuci + setrika</span>
+            <span class="layanan-chip">✅ Setrika pakaian</span>
+            <span class="layanan-chip">✅ Cuci jaket</span>
+            <span class="layanan-chip">✅ Cuci boneka</span>
+            <span class="layanan-chip">✅ Cuci selimut</span>
+            <span class="layanan-chip">✅ Cuci sprei</span>
+            <span class="layanan-chip">✅ Cuci bed cover</span>
+            <span class="layanan-chip">✅ Cuci sepatu</span>
+            <span class="layanan-chip">✅ Cuci tas</span>
+            <span class="layanan-chip">✅ Laundry satuan</span>
+            <span class="layanan-chip">✅ Laundry kiloan</span>
+            <span class="layanan-chip">✅ Antar & jemput (jika tersedia)</span>
+        </div>
+
+        <!-- ================= PROMO PEMBUKAAN ================= -->
+        <!-- ⬇️ JIKA PROMO BERAKHIR/GANTI: edit teks & harga di blok ini -->
+        <div style="background: linear-gradient(135deg, #0ea5e9, #6366f1); border-radius: 16px; padding: 20px 15px; text-align: center; margin-bottom: 24px; color: white;">
+            <div style="font-size: 0.75rem; font-weight: 700; letter-spacing: 2px; background: rgba(255,255,255,0.2); display: inline-block; padding: 4px 12px; border-radius: 50px; margin-bottom: 10px;">🎉 PROMO PEMBUKAAN</div>
+            <div style="font-size: 1.1rem; font-weight: 800;">CUCI + SETRIKA</div>
+            <div style="font-size: 2rem; font-weight: 900; margin: 6px 0;">Rp10.000<span style="font-size: 1rem; font-weight: 600;">/KG</span></div>
+            <div style="font-size: 0.85rem; opacity: 0.95;">📦 Minimal 3 KG &nbsp;•&nbsp; 🛵 Antar & Jemput area sekitar Gavin Laundry</div>
+        </div>
+
+        <!-- ================= DAFTAR HARGA ================= -->
+        <!-- ⬇️ GANTI HARGA DI SINI JIKA ADA KENAIKAN: cukup ubah angka Rp-nya -->
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 16px; margin-bottom: 20px;">
+            <div style="text-align: center; color: #1e293b; font-weight: 800; font-size: 1rem; margin-bottom: 4px;">🧺 DAFTAR HARGA GAVIN LAUNDRY</div>
+
+            <!-- PAKET KILOAN -->
+            <div class="harga-grup-title">👕 Paket Kiloan</div>
+            <div class="harga-row"><span class="nama">Cuci + Kering + Lipat</span><span class="harga">Rp8.000/kg</span></div>
+            <div class="harga-row"><span class="nama">Cuci + Setrika</span><span class="harga">Rp10.000/kg</span></div>
+            <div class="harga-row"><span class="nama">Cuci + Kering + Setrika</span><span class="harga">Rp12.000/kg</span></div>
+            <div class="harga-row"><span class="nama">Setrika saja</span><span class="harga">Rp7.000/kg</span></div>
+
+            <!-- PAKET SATUAN -->
+            <div class="harga-grup-title">👔 Paket Satuan</div>
+            <div class="harga-row"><span class="nama">Jaket</span><span class="harga">Rp15.000/pcs</span></div>
+            <div class="harga-row"><span class="nama">Celana panjang</span><span class="harga">Rp10.000/pcs</span></div>
+            <div class="harga-row"><span class="nama">Gamis</span><span class="harga">Rp15.000/pcs</span></div>
+
+            <!-- BONEKA -->
+            <div class="harga-grup-title">🧸 Boneka</div>
+            <div class="harga-row"><span class="nama">Boneka kecil</span><span class="harga">Rp15.000/pcs</span></div>
+            <div class="harga-row"><span class="nama">Boneka sedang</span><span class="harga">Rp25.000/pcs</span></div>
+            <div class="harga-row"><span class="nama">Boneka besar</span><span class="harga">Rp35.000/pcs</span></div>
+
+            <!-- LINEN -->
+            <div class="harga-grup-title">🛏️ Sprei, Selimut & Bed Cover</div>
+            <div class="harga-row"><span class="nama">Sprei</span><span class="harga">Rp15.000/set</span></div>
+            <div class="harga-row"><span class="nama">Selimut tipis</span><span class="harga">Rp20.000/pcs</span></div>
+            <div class="harga-row"><span class="nama">Selimut tebal</span><span class="harga">Rp30.000/pcs</span></div>
+            <div class="harga-row"><span class="nama">Bed cover</span><span class="harga">Rp25.000/pcs</span></div>
+
+            <!-- LAINNYA -->
+            <div class="harga-grup-title">👟 Sepatu & Tas</div>
+            <div class="harga-row"><span class="nama">Sepatu</span><span class="harga">Mulai Rp20.000/pasang</span></div>
+            <div class="harga-row"><span class="nama">Tas</span><span class="harga">Mulai Rp20.000/pcs</span></div>
+        </div>
+
+        <!-- ================= TOMBOL PESAN ================= -->
+        <div style="text-align: center; margin-bottom: 14px;">
+            <a href="https://wa.me/6285765850084" target="_blank"
+               style="display: inline-block; background-color: #22c55e; color: white; text-decoration: none; padding: 12px 24px; border-radius: 50px; font-weight: 700; font-size: 0.9rem; box-shadow: 0 4px 10px rgba(34, 197, 94, 0.25);">
+               📲 Pesan Sekarang via WhatsApp
+            </a>
+        </div>
+
+        <div style="text-align: center;">
+            <a href="#" class="back-btn" onclick="bukaHalaman('beranda')">⬅️ Kembali ke Beranda</a>
         </div>
     </div>
+</div>
             
         <!-- HALAMAN GALERY (VERSI DINAMIS & SIMPEL ALA FACEBOOK MARKETPLACE) -->
     <div id="galery" class="page-content">
