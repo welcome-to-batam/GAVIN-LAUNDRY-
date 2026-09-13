@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>Tes Notifikasi</title></head>
+<body style="font-family:sans-serif; padding:20px; text-align:center;">
+<h2>🧪 Tes Jalur Notifikasi</h2>
+<button onclick="tesKirim()" style="padding:15px 30px; font-size:1rem; background:#0ea5e9; color:white; border:none; border-radius:50px;">🔔 Kirim Tes Notifikasi</button>
+<pre id="hasil" style="text-align:left; background:#f1f5f9; padding:15px; border-radius:10px; white-space:pre-wrap; margin-top:20px;">Hasil muncul di sini...</pre>
+<script>
+function tesKirim() {
+    const hasil = document.getElementById('hasil');
+    hasil.textContent = 'Mengirim...';
+    fetch('https://gavin-laundry.cowokperenung.workers.dev/notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nama: 'Tes Manual', rating: 5, pesan: 'Tes dari halaman diagnosis' })
+    })
+    .then(function(r) { return r.text().then(function(t) { return { status: r.status, body: t }; }); })
+    .then(function(h) { hasil.textContent = 'Status: ' + h.status + '\n\nJawaban worker:\n' + h.body; })
+    .catch(function(e) { hasil.textContent = 'GAGAL TOTAL:\n' + e.message; });
+}
+</script>
+</body>
+</html>
