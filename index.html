@@ -523,11 +523,16 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 
+    <script>
+window.onerror = function(msg, sumber, baris, kolom) {
+    alert("EROR JS!\n" + msg + "\n\nBaris: " + baris + "  Kolom: " + kolom);
+};
+    </script>
+
     <!-- SCRIPT JAVASCRIPT UNTUK NAVIGASI DAN PWA -->
     <script>
-        const firebaseConfig = {
-  apiKey: "AIzaSyCmkkv9cHccaUyVRZ5ZPqgJm_HDJ79Vcy0",
-  authDomain: "gavin-laundry.firebaseapp.com",
+        // ===== 1. KONEKSI FIREBASE (GANTI DENGAN 6 BARIS MILIKMU!) =====
+authDomain: "gavin-laundry.firebaseapp.com",
   projectId: "gavin-laundry",
   storageBucket: "gavin-laundry.firebasestorage.app",
   messagingSenderId: "789711438711",
@@ -536,51 +541,76 @@
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-        // ===== MODE ADMIN =====
+// ===== 2. STATUS GLOBAL =====
 let adminAktif = false;
+let dataGaleri = null;
+let dataTestimoni = null;
+let ratingDipilih = 5;
 
+// ===== 3. MENU LACI =====
+const menuToggle = document.getElementById('menuToggle');
+const navMenu = document.getElementById('navMenu');
+menuToggle.addEventListener('click', function() {
+    navMenu.classList.toggle('open');
+});
+
+// ===== 4. NAVIGASI HALAMAN =====
+function bukaHalaman(idHalaman) {
+    const semuaHalaman = document.querySelectorAll('.page-content');
+    semuaHalaman.forEach(function(h) { h.classList.remove('active'); });
+    const tujuan = document.getElementById(idHalaman);
+    if (tujuan) tujuan.classList.add('active');
+    navMenu.classList.remove('open');
+    window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+// ===== 5. SERVICE WORKER (PWA) =====
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+        navigator.serviceWorker.register('sw.js');
+    });
+}
+
+// ===== 6. MODE ADMIN =====
 firebase.auth().onAuthStateChanged(function(user) {
     const panel = document.getElementById('panel-upload');
     if (user) {
         adminAktif = true;
-        panel.style.display = 'block';
+        if (panel) panel.style.display = 'block';
     } else {
         adminAktif = false;
-        panel.style.display = 'none';
+        if (panel) panel.style.display = 'none';
     }
-    renderGaleri(); // refresh tampilan: tombol hapus ikut muncul/hilang
+    renderGaleri();
+    renderTestimoni();
 });
-        
-// ===== PINTU RAHASIA: TAP LOGO 5 KALI DALAM 2 DETIK =====
+
 let hitungTap = 0;
 let timerTap;
-
-document.getElementById('logo-admin').addEventListener('click', function() {
-    hitungTap++;
-    clearTimeout(timerTap);
-    timerTap = setTimeout(function() { hitungTap = 0; }, 2000);
-
-    if (hitungTap >= 5) {
-        hitungTap = 0;
-        if (!firebase.auth().currentUser) {
-            loginAdmin();
+const logoAdmin = document.getElementById('logo-admin');
+if (logoAdmin) {
+    logoAdmin.style.cursor = 'pointer';
+    logoAdmin.style.touchAction = 'manipulation';
+    logoAdmin.addEventListener('click', function() {
+        hitungTap++;
+        clearTimeout(timerTap);
+        timerTap = setTimeout(function() { hitungTap = 0; }, 2000);
+        if (hitungTap >= 5) {
+            hitungTap = 0;
+            clearTimeout(timerTap);
+            if (!firebase.auth().currentUser) loginAdmin();
         }
-    }
-});
+    });
+}
 
 function loginAdmin() {
     const email = prompt('Email admin:');
     if (!email) return;
     const sandi = prompt('Password:');
     if (!sandi) return;
-
     firebase.auth().signInWithEmailAndPassword(email, sandi)
-        .then(function() {
-            alert('Login berhasil! Panel upload sudah aktif.');
-        })
-        .catch(function(err) {
-            alert('Login gagal: ' + err.message);
-        });
+        .then(function() { alert('Login berhasil! Panel upload sudah aktif.'); })
+        .catch(function(err) { alert('Login gagal: ' + err.message); });
 }
 
 function logoutAdmin() {
@@ -588,52 +618,49 @@ function logoutAdmin() {
         alert('Anda telah keluar dari mode admin.');
     });
 }
-        
-        // Logika Laci Menu Buka/Tutup
-        const menuToggle = document.getElementById('menuToggle');
-        const navMenu = document.getElementById('navMenu');
 
-        menuToggle.addEventListener('click', () => {
-            navMenu.classList.toggle('open');
-        });
+// ===== 7. GALERI FOTO =====
+function muatGaleri() {
+    db.collection('galeri').orderBy('waktu', 'desc').onSnapshot(function(snapshot) {
+        dataGaleri = snapshot;
+        renderGaleri();
+    }, function(error) { console.error('Gagal memuat galeri:', error); });
+}
 
-        // LOGIKA PERPINDAHAN HALAMAN SECARA OTOMATIS
-        function bukaHalaman(idHalaman) {
-            // 1. Sembunyikan semua halaman terlebih dahulu
-            const semuaHalaman = document.querySelectorAll('.page-content');
-            semuaHalaman.forEach(halaman => {
-                halaman.classList.remove('active');
-            });
-
-            // 2. Tampilkan halaman yang dipilih pelanggan
-            const halamanTujuan = document.getElementById(idHalaman);
-            if (halamanTujuan) {
-                halamanTujuan.classList.add('active');
-            }
-
-            // 3. Otomatis tutup kembali laci menu setelah diklik
-            navMenu.classList.remove('open');
-            
-            // 4. Geser layar otomatis kembali ke posisi paling atas agar tidak tenggelam
-            window.scrollTo({top: 0, behavior: 'smooth'});
+function renderGaleri() {
+    if (!dataGaleri) return;
+    const grid = document.getElementById('grid-galeri-dinamis');
+    if (!grid) return;
+    grid.innerHTML = '';
+    if (dataGaleri.empty) {
+        grid.innerHTML = '<p style="color:#94a3b8; text-align:center; grid-column:span 2;">Belum ada foto.</p>';
+        return;
+    }
+    dataGaleri.forEach(function(doc) {
+        const foto = doc.data();
+        let tombolHapus = '';
+        if (adminAktif) {
+            tombolHapus = '<button onclick="hapusFoto(\'' + doc.id + '\')" style="position:absolute; top:8px; right:8px; background:#ef4444; color:white; border:none; border-radius:50%; width:36px; height:36px; font-size:1rem; box-shadow:0 2px 8px rgba(0,0,0,0.35);">🗑️</button>';
         }
+        grid.innerHTML += '<div style="background:#f8fafc; border-radius:12px; overflow:hidden; box-shadow:0 4px 10px rgba(0,0,0,0.05); position:relative;">'
+            + '<img src="' + foto.url + '" alt="Foto Galeri" style="width:100%; height:140px; object-fit:cover; display:block;">'
+            + tombolHapus + '</div>';
+    });
+}
 
-        // Registrasi Service Worker PWA agar bisa diinstall di HP
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js');
-            });
-        }
+function hapusFoto(idFoto) {
+    if (!confirm('Hapus foto ini dari galeri?')) return;
+    db.collection('galeri').doc(idFoto).delete()
+        .catch(function(err) { alert('Gagal hapus: ' + err.message); });
+}
 
-        // GANTI FUNGSI YANG LAMA DENGAN KODE OTOMATIS INI, BOS:
-    function previewFoto(event) {
+// ===== 8. UPLOAD FOTO via WORKER =====
+function previewFoto(event) {
     const input = event.target;
-
     if (!input.files || input.files.length === 0) {
         alert("Pilih foto terlebih dahulu ya bos!");
         return;
     }
-
     const fileAsli = input.files[0];
 
     const reader = new FileReader();
@@ -646,145 +673,81 @@ function logoutAdmin() {
     const formData = new FormData();
     formData.append('image', fileAsli);
 
-    console.log("Sedang mencoba mengunggah foto ke cloud...");
-
     fetch('https://gavin-laundry.cowokperenung.workers.dev', {
         method: 'POST',
         body: formData
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Jalur koneksi ditolak server atau API Key salah.');
-        }
+    .then(function(response) {
+        if (!response.ok) throw new Error('Koneksi ditolak server atau API Key salah.');
         return response.json();
     })
-    .then(hasil => {
+    .then(function(hasil) {
         if (hasil.success) {
-            const linkGambarJadi = hasil.data.url;
             return db.collection('galeri').add({
-                url: linkGambarJadi,
+                url: hasil.data.url,
                 waktu: firebase.firestore.FieldValue.serverTimestamp()
             });
         } else {
             throw new Error(hasil.error ? hasil.error.message : "Eror tidak dikenal");
         }
     })
-    .then(() => {
+    .then(function() {
         alert("🎉 Foto sukses terunggah & langsung tampil di galeri!");
     })
-    .catch(error => {
+    .catch(function(error) {
         console.error('Detail Eror:', error);
         alert("Eror Terjadi!\nPenyebab: " + error.message);
     });
 }
 
-// ===== GALERI: DATA + RENDER + HAPUS =====
-let dataGaleri = null; // tempat menampung foto terbaru dari database
-
-function muatGaleri() {
-    db.collection('galeri').orderBy('waktu', 'desc').onSnapshot(snapshot => {
-        dataGaleri = snapshot;
-        renderGaleri();
-    }, error => console.error('Gagal memuat galeri:', error));
-}
-
-function renderGaleri() {
-    if (!dataGaleri) return; // data belum tiba, tunggu snapshot pertama
-
-    const grid = document.getElementById('grid-galeri-dinamis');
-    grid.innerHTML = '';
-
-    if (dataGaleri.empty) {
-        grid.innerHTML = '<p style="color:#94a3b8; text-align:center; grid-column:span 2;">Belum ada foto.</p>';
-        return;
-    }
-
-    dataGaleri.forEach(doc => {
-        const foto = doc.data();
-        const idFoto = doc.id;
-
-        // Tombol hapus hanya dirender kalau sedang login admin
-        const tombolHapus = adminAktif
-            ? `<button onclick="hapusFoto('${idFoto}')" style="position:absolute; top:8px; right:8px; background:#ef4444; color:white; border:none; border-radius:50%; width:36px; height:36px; font-size:1rem; box-shadow:0 2px 8px rgba(0,0,0,0.35);">🗑️</button>`
-            : '';
-
-        grid.innerHTML += `
-            <div style="background:#f8fafc; border-radius:12px; overflow:hidden; box-shadow:0 4px 10px rgba(0,0,0,0.05); position:relative;">
-                <img src="${foto.url}" alt="Foto Galeri" style="width:100%; height:140px; object-fit:cover; display:block;">
-                ${tombolHapus}
-            </div>`;
-    });
-}
-
-function hapusFoto(idFoto) {
-    if (!confirm('Hapus foto ini dari galeri?')) return;
-
-    db.collection('galeri').doc(idFoto).delete()
-        .catch(err => alert('Gagal hapus: ' + err.message));
-}
-
-muatGaleri(); // jalankan saat halaman dibuka
-
-        // ===== TESTIMONI PELANGGAN =====
-let dataTestimoni = null;
-let ratingDipilih = 5;
-
+// ===== 9. TESTIMONI =====
 function muatTestimoni() {
-    db.collection('testimoni').onSnapshot(snapshot => {
+    db.collection('testimoni').onSnapshot(function(snapshot) {
         dataTestimoni = snapshot;
         renderTestimoni();
-    }, error => console.error('Gagal memuat testimoni:', error));
+    }, function(error) { console.error('Gagal memuat testimoni:', error); });
 }
 
 function renderTestimoni() {
     if (!dataTestimoni) return;
-
     const wadah = document.getElementById('daftar-testimoni');
-    if (!wadah) return;
+    const panelPending = document.getElementById('panel-pending-testimoni');
+    const wadahPending = document.getElementById('daftar-pending');
 
-    // Urutkan terbaru dulu (sort di browser agar tidak perlu index Firestore)
-    const semua = dataTestimoni.docs.slice().sort((a, b) => {
+    const semua = dataTestimoni.docs.slice().sort(function(a, b) {
         const ta = a.data().waktu ? a.data().waktu.toMillis() : 0;
         const tb = b.data().waktu ? b.data().waktu.toMillis() : 0;
         return tb - ta;
     });
+    const disetujui = semua.filter(function(d) { return d.data().disetujui === true; });
+    const menunggu = semua.filter(function(d) { return d.data().disetujui === false; });
 
-    const disetujui = semua.filter(d => d.data().disetujui === true);
-    const menunggu  = semua.filter(d => d.data().disetujui === false);
-    
-    // BADGE ADMIN: angka merah di tombol menu + judul tab
-const badge = document.getElementById('badge-testi');
-if (badge) {
-    if (adminAktif && menunggu.length > 0) {
-        badge.textContent = menunggu.length;
-        badge.style.display = 'flex';
-        document.title = `🔔 (${menunggu.length}) Gavin Laundry`;
-    } else {
-        badge.style.display = 'none';
-        document.title = 'Gavin Laundry';
-    }
-}
-
-    // 1. Daftar testimoni publik
-    wadah.innerHTML = '';
-    if (disetujui.length === 0) {
-        wadah.innerHTML = '<p style="color:#94a3b8; text-align:center; font-size:0.9rem;">Belum ada testimoni. Jadilah yang pertama! 😊</p>';
-    } else {
-        disetujui.forEach(doc => {
-            wadah.innerHTML += kartuTestimoni(doc, true);
-        });
+    if (wadah) {
+        wadah.innerHTML = '';
+        if (disetujui.length === 0) {
+            wadah.innerHTML = '<p style="color:#94a3b8; text-align:center; font-size:0.9rem;">Belum ada testimoni. Jadilah yang pertama! 😊</p>';
+        } else {
+            disetujui.forEach(function(doc) { wadah.innerHTML += kartuTestimoni(doc, true); });
+        }
     }
 
-    // 2. Antrian persetujuan (hanya muncul saat login admin)
-    const panelPending = document.getElementById('panel-pending-testimoni');
-    const wadahPending = document.getElementById('daftar-pending');
+    const badge = document.getElementById('badge-testi');
+    if (badge) {
+        if (adminAktif && menunggu.length > 0) {
+            badge.textContent = menunggu.length;
+            badge.style.display = 'flex';
+            document.title = '🔔 (' + menunggu.length + ') Gavin Laundry';
+        } else {
+            badge.style.display = 'none';
+            document.title = 'Gavin Laundry';
+        }
+    }
+
     if (panelPending && wadahPending) {
         wadahPending.innerHTML = '';
         if (adminAktif && menunggu.length > 0) {
             panelPending.style.display = 'block';
-            menunggu.forEach(doc => {
-                wadahPending.innerHTML += kartuTestimoni(doc, false);
-            });
+            menunggu.forEach(function(doc) { wadahPending.innerHTML += kartuTestimoni(doc, false); });
         } else {
             panelPending.style.display = 'none';
         }
@@ -794,43 +757,33 @@ if (badge) {
 function kartuTestimoni(doc, sudahDisetujui) {
     const t = doc.data();
     const bintang = '⭐'.repeat(t.rating || 5);
-
     let tombolAdmin = '';
-    if (adminAktif) {
-        if (!sudahDisetujui) {
-            tombolAdmin = `
-                <div style="margin-top: 10px;">
-                    <button onclick="setujuiTestimoni('${doc.id}')" style="background:#22c55e; color:white; border:none; padding:8px 16px; border-radius:50px; font-weight:600; font-size:0.8rem; margin-right:6px;">✅ Setujui</button>
-                    <button onclick="hapusTestimoni('${doc.id}')" style="background:#ef4444; color:white; border:none; padding:8px 16px; border-radius:50px; font-weight:600; font-size:0.8rem;">🗑️ Hapus</button>
-                </div>`;
-        } else {
-            tombolAdmin = `
-                <div style="margin-top: 10px;">
-                    <button onclick="hapusTestimoni('${doc.id}')" style="background:#ef4444; color:white; border:none; padding:8px 16px; border-radius:50px; font-weight:600; font-size:0.8rem;">🗑️ Hapus</button>
-                </div>`;
-        }
+    if (adminAktif && !sudahDisetujui) {
+        tombolAdmin = '<div style="margin-top:10px;">'
+            + '<button onclick="setujuiTestimoni(\'' + doc.id + '\')" style="background:#22c55e; color:white; border:none; padding:8px 16px; border-radius:50px; font-weight:600; font-size:0.8rem; margin-right:6px;">✅ Setujui</button> '
+            + '<button onclick="hapusTestimoni(\'' + doc.id + '\')" style="background:#ef4444; color:white; border:none; padding:8px 16px; border-radius:50px; font-weight:600; font-size:0.8rem;">🗑️ Hapus</button></div>';
+    } else if (adminAktif) {
+        tombolAdmin = '<div style="margin-top:10px;">'
+            + '<button onclick="hapusTestimoni(\'' + doc.id + '\')" style="background:#ef4444; color:white; border:none; padding:8px 16px; border-radius:50px; font-weight:600; font-size:0.8rem;">🗑️ Hapus</button></div>';
     }
-
-    return `
-        <div style="background:#ffffff; border-radius:12px; padding:14px; margin-bottom:12px; box-shadow:0 2px 8px rgba(0,0,0,0.06); border-left:4px solid #f59e0b;">
-            <div style="font-size:0.85rem; letter-spacing:2px;">${bintang}</div>
-            <p style="color:#334155; font-size:0.92rem; line-height:1.55; margin:8px 0;">"${escapeHTML(t.pesan)}"</p>
-            <p style="color:#64748b; font-size:0.8rem; font-weight:700;">— ${escapeHTML(t.nama)}</p>
-            ${tombolAdmin}
-        </div>`;
+    return '<div style="background:#ffffff; border-radius:12px; padding:14px; margin-bottom:12px; box-shadow:0 2px 8px rgba(0,0,0,0.06); border-left:4px solid #f59e0b;">'
+        + '<div style="font-size:0.85rem; letter-spacing:2px;">' + bintang + '</div>'
+        + '<p style="color:#334155; font-size:0.92rem; line-height:1.55; margin:8px 0;">"' + escapeHTML(t.pesan) + '"</p>'
+        + '<p style="color:#64748b; font-size:0.8rem; font-weight:700;">— ' + escapeHTML(t.nama) + '</p>'
+        + tombolAdmin + '</div>';
 }
 
 function pilihRating(n) {
     ratingDipilih = n;
     for (let i = 1; i <= 5; i++) {
-        document.getElementById('bintang-' + i).style.opacity = (i <= n) ? '1' : '0.25';
+        const el = document.getElementById('bintang-' + i);
+        if (el) el.style.opacity = (i <= n) ? '1' : '0.25';
     }
 }
 
- function kirimTestimoni() {
+function kirimTestimoni() {
     const nama = document.getElementById('input-nama-testimoni').value.trim();
     const pesan = document.getElementById('input-pesan-testimoni').value.trim();
-
     if (nama.length < 2)  { alert('Isi nama dulu ya 😊'); return; }
     if (pesan.length < 5) { alert('Tulis pesan testimoni dulu ya 😊'); return; }
 
@@ -841,50 +794,40 @@ function pilihRating(n) {
         disetujui: false,
         waktu: firebase.firestore.FieldValue.serverTimestamp()
     })
-    .then(() => {
-        // Notif dikirim DULU sebelum alert membekukan JavaScript
+    .then(function() {
         fetch('https://gavin-laundry.cowokperenung.workers.dev/notify', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ nama: nama, rating: ratingDipilih, pesan: pesan })
-        }).catch(() => null);
+        }).catch(function() { return null; });
 
         alert('Terima kasih! 🙏\n\nTestimoni Anda akan tampil setelah disetujui admin.');
         document.getElementById('input-nama-testimoni').value = '';
         document.getElementById('input-pesan-testimoni').value = '';
         pilihRating(5);
     })
-    .catch(err => alert('Gagal mengirim: ' + err.message));
- }
-
-        // ===== NOTIFIKASI KE HP ADMIN via WORKER → NTFY =====
-        return fetch('https://gavin-laundry.cowokperenung.workers.dev/notify', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ nama: nama, rating: ratingDipilih, pesan: pesan })
-        }).catch(() => null); // kalau notif gagal, pengirim tetap tidak terganggu
-    })
-    .catch(err => alert('Gagal mengirim: ' + err.message));
-    }
+    .catch(function(err) { alert('Gagal mengirim: ' + err.message); });
+}
 
 function setujuiTestimoni(id) {
     db.collection('testimoni').doc(id).update({ disetujui: true })
-        .catch(err => alert('Gagal: ' + err.message));
+        .catch(function(err) { alert('Gagal: ' + err.message); });
 }
 
 function hapusTestimoni(id) {
     if (!confirm('Hapus testimoni ini?')) return;
     db.collection('testimoni').doc(id).delete()
-        .catch(err => alert('Gagal: ' + err.message));
+        .catch(function(err) { alert('Gagal: ' + err.message); });
 }
 
-// Pelindung: teks pelanggan di-escape agar tidak bisa menyuntik kode jahat
 function escapeHTML(teks) {
     const div = document.createElement('div');
     div.textContent = teks;
     return div.innerHTML;
 }
 
+// ===== 10. JALANKAN =====
+muatGaleri();
 muatTestimoni();
     </script>
 </body>
