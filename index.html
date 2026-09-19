@@ -656,52 +656,51 @@ function hapusFoto(idFoto) {
         .catch(function(err) { alert('Gagal hapus: ' + err.message); });
 }
 
-// ===== 8. UPLOAD FOTO via WORKER =====
-function previewFoto(event) {
-    const input = event.target;
-    if (!input.files || input.files.length === 0) {
-        alert("Pilih foto terlebih dahulu ya bos!");
-        return;
+// --- 8. UPLOAD FOTO: KOMPRES + SIMPAN LANGSUNG KE FIRESTORE (VERSI GAVIN) ---
+function previewDanUploadFoto(input) {
+    if (input.files && input.files.length > 0) {
+
+        const file = input.files[0];
+        alert("Sedang memproses foto, mohon tunggu sebentar, Bos...");
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = new Image();
+            img.onload = function() {
+                // Kompres lebih agresif: maks 1000px, kualitas 60%
+                // (Firestore punya batas 1 dokumen = 1 MB, jadi kita lebih hemat)
+                const MAX = 1000;
+                let w = img.width, h = img.height;
+                if (w > MAX || h > MAX) {
+                    const r = Math.min(MAX / w, MAX / h);
+                    w = Math.round(w * r);
+                    h = Math.round(h * r);
+                }
+                const canvas = document.createElement('canvas');
+                canvas.width = w;
+                canvas.height = h;
+                canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.6);
+
+                db.collection('galeri').add({
+                    fotoBase64: dataUrl,
+                    timestamp: Date.now()
+                }).then(() => {
+                    alert("Keren Bos! Foto sukses terupload dan tampil di galeri!");
+                    document.getElementById('galleryFileInput').value = "";
+                }).catch(err => {
+                    alert("Gagal simpan ke database: " + err.message);
+                });
+            };
+            img.onerror = function() {
+                alert("File ini bukan gambar yang valid, Bos.");
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
     }
-    const fileAsli = input.files[0];
-
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        document.getElementById('img-preview').src = e.target.result;
-        document.getElementById('kotak-preview').style.display = 'block';
-    };
-    reader.readAsDataURL(fileAsli);
-
-    const formData = new FormData();
-    formData.append('image', fileAsli);
-
-    fetch('https://gavin-laundry.cowokperenung.workers.dev', {
-        method: 'POST',
-        body: formData
-    })
-    .then(function(response) {
-        if (!response.ok) throw new Error('Koneksi ditolak server atau API Key salah.');
-        return response.json();
-    })
-    .then(function(hasil) {
-        if (hasil.success) {
-            return db.collection('galeri').add({
-                url: hasil.data.url,
-                waktu: firebase.firestore.FieldValue.serverTimestamp()
-            });
-        } else {
-            throw new Error(hasil.error ? hasil.error.message : "Eror tidak dikenal");
-        }
-    })
-    .then(function() {
-        alert("🎉 Foto sukses terunggah & langsung tampil di galeri!");
-    })
-    .catch(function(error) {
-        console.error('Detail Eror:', error);
-        alert("Eror Terjadi!\nPenyebab: " + error.message);
-    });
 }
-
+        
 // ===== 9. TESTIMONI =====
 function muatTestimoni() {
     db.collection('testimoni').onSnapshot(function(snapshot) {
