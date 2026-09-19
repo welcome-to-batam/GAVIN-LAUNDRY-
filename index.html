@@ -687,7 +687,7 @@ function previewDanUploadFoto(input) {
                     timestamp: Date.now()
                 }).then(() => {
                     alert("Keren Bos! Foto sukses terupload dan tampil di galeri!");
-                    document.getElementById('galleryFileInput').value = "";
+                    input.value = "";
                 }).catch(err => {
                     alert("Gagal simpan ke database: " + err.message);
                 });
