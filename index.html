@@ -192,7 +192,7 @@
             position: fixed;
             bottom: 25px; /* Jarak dari bawah layar */
             right: 25px;  /* Jarak dari kanan layar */
-            width: 120px; /* Ukuran tombol (bisa diubah ke 100px - 150px) */
+            width: 120px; /* Ukuran tombol */
             height: 120px;
             display: flex;
             justify-content: center;
@@ -207,15 +207,15 @@
             visibility: visible;
         }
 
-        /* Kelas CSS yang akan dipicu oleh JavaScript saat halaman di-scroll */
+        /* Kelas CSS ketika halaman sedang di-scroll */
         .tombol-api-link.tersembunyi {
             opacity: 0;
             transform: scale(0.7) translateY(20px);
             visibility: hidden;
-            pointer-events: none; /* Mencegah tombol tidak sengaja tertimpa klik saat hilang */
+            pointer-events: none;
         }
 
-        /* KUNCI UTAMA: Memotong fisik kanvas agar bulat total & menghilangkan benjolan hitam */
+        /* Memotong fisik kanvas agar lingkaran presisi */
         canvas {
             position: absolute;
             top: 0;
@@ -223,25 +223,29 @@
             width: 100%;
             height: 100%;
             z-index: 1;
-            border-radius: 50%; /* Memotong paksa sisi luar menjadi lingkaran */
+            border-radius: 50%;
             overflow: hidden;
         }
 
-        /* Wadah foto di tengah lingkaran */
+        /* PERBAIKAN: Wadah foto tengah diubah latarnya menjadi putih transparan untuk efek lensa putih */
         .foto-tengah {
             position: absolute;
-            width: 48px; /* Disesuaikan sebanding dengan tombol 120px */
+            width: 48px;
             height: 48px;
             border-radius: 50%;
             overflow: hidden;
             z-index: 2;
-            background: #000;
-            border: 1px solid rgba(255, 100, 0, 0.4);
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.9);
+            background: #ffffff; /* Mengubah warna dasar lubang tengah menjadi putih */
+            border: 2px solid rgba(255, 255, 255, 0.8); /* Frame lingkar putih */
+            
+            /* Efek lensa cembung dengan bayangan dalam bernuansa putih-terang */
+            box-shadow: 
+                inset 0 0 8px rgba(0, 0, 0, 0.3),
+                0 0 15px rgba(255, 255, 255, 0.6);
             display: flex;
             justify-content: center;
             align-items: center;
-            pointer-events: none; /* Klik diteruskan ke elemen link di bawahnya */
+            pointer-events: none;
         }
 
         .foto-tengah img {
