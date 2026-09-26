@@ -1043,11 +1043,6 @@ muatTestimoni();
         }
         resize();
 
-// Pemicu Cadangan: Jika tombol terjebak hilang setelah klik menu, 
-// begitu layar disentuh atau digeser sedikit oleh jari, tombol langsung dipaksa muncul
-window.addEventListener('touchstart', munculkanTombol);
-window.addEventListener('touchend', munculkanTombol);
-
                 // Loop Animasi Render Utama
         function render(time) {
             time *= 0.001;
