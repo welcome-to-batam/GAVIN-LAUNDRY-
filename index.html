@@ -175,25 +175,19 @@
             position: fixed;
             bottom: 25px; /* Jarak dari bawah layar */
             right: 25px;  /* Jarak dari kanan layar */
-            width: 140px; 
+            width: 140px; /* Sedikit diperbesar menjadi 140px agar ruang awan jingga terlihat megah */
             height: 140px;
             display: flex;
             justify-content: center;
             align-items: center;
+            z-index: 9999;
             text-decoration: none;
             
-            /* KUNCI PERBAIKAN 1: Naikkan tingkat lapisan ke angka maksimal 
-               agar tombol dipaksa melayang DI ATAS tirai menu garis tiga */
-            z-index: 999999999 !important; 
-            
-            /* KUNCI PERBAIKAN 2: Memastikan tombol tidak terpengaruh oleh 
-               efek pergeseran halaman (transform) saat menu garis tiga dibuka */
-            transform: translate3d(0, 0, 0) !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-            
-            /* Efek Transisi Halus saat Muncul */
-            transition: opacity 0.4s ease, transform 0.4s ease;
+            /* Efek Transisi Halus saat Muncul/Hilang ketika Scroll */
+            transition: opacity 0.4s ease, transform 0.4s ease, visibility 0.4s;
+            opacity: 1;
+            transform: scale(1);
+            visibility: visible;
         }
 
         /* Kelas CSS yang otomatis aktif saat layar HP di-scroll */
@@ -314,10 +308,10 @@
         <!-- Lingkaran Foto Lensa Cembung -->
         <div class="foto-tengah">
             <!-- Ganti URL di bawah ini dengan file foto.jpg asli Anda -->
-            <img src="foto.png" alt="Avatar">
+            <img src="https://picsum.photos" alt="Avatar">
         </div>
     </a>
-
+                
                 <div class="promo-box">
                     <div class="promo-title">🎉 PROMO PELANGGAN BARU!</div>
                     <div class="promo-desc">Dapatkan harga spesial untuk laundry pertama Anda!</div>
@@ -938,8 +932,8 @@ function escapeHTML(teks) {
 muatGaleri();
 muatTestimoni();
     </script>
-
-    <!-- SCRIPT LOGIKA ANIMASI & SCROLL -->
+    
+    <!-- SCRIPT PROGRAM ANIMASI WEBGL SHADER STABIL -->
     <script>
         const linkTombol = document.getElementById('tombolApi');
         const canvas = document.getElementById('canvasApi');
@@ -1043,7 +1037,17 @@ muatTestimoni();
         }
         resize();
 
-                // Loop Animasi Render Utama
+        // Sistem Auto Hide saat halaman di-scroll
+        let timeoutScroll;
+        window.addEventListener('scroll', () => {
+            linkTombol.classList.add('tersembunyi');
+            clearTimeout(timeoutScroll);
+            timeoutScroll = setTimeout(() => {
+                linkTombol.classList.remove('tersembunyi');
+            }, 1200); 
+        });
+
+        // Loop Animasi Render Utama
         function render(time) {
             time *= 0.001;
             speedMultiplier += (targetSpeedMultiplier - speedMultiplier) * 0.1;
@@ -1062,6 +1066,6 @@ muatTestimoni();
         }
         requestAnimationFrame(render);
     </script>
-</body>
+    </body>
 </html>
             
