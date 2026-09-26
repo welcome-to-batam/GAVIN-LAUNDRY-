@@ -167,6 +167,88 @@
             font-size: 0.9rem;
             margin-top: 10px;
         }
+
+         /* CSS Tambahan untuk simulasi scroll halaman */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #0d0d0d;
+            font-family: sans-serif;
+            color: #fff;
+            height: 250vh; /* Membuat halaman panjang ke bawah agar bisa di-scroll */
+        }
+
+        .konten-dummy {
+            padding: 30px;
+            font-size: 1.2rem;
+            line-height: 1.8;
+            max-width: 600px;
+        }
+
+        /* ========================================== */
+        /* STRUKTUR UTAMA TOMBOL API (FLOATING BUTTON) */
+        /* ========================================== */
+        .tombol-api-link {
+            position: fixed;
+            bottom: 25px; /* Jarak dari bawah layar */
+            right: 25px;  /* Jarak dari kanan layar */
+            width: 120px; /* Ukuran tombol (bisa diubah ke 100px - 150px) */
+            height: 120px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            text-decoration: none;
+            
+            /* Efek Transisi Halus saat Muncul/Hilang ketika Scroll */
+            transition: opacity 0.4s ease, transform 0.4s ease, visibility 0.4s;
+            opacity: 1;
+            transform: scale(1);
+            visibility: visible;
+        }
+
+        /* Kelas CSS yang akan dipicu oleh JavaScript saat halaman di-scroll */
+        .tombol-api-link.tersembunyi {
+            opacity: 0;
+            transform: scale(0.7) translateY(20px);
+            visibility: hidden;
+            pointer-events: none; /* Mencegah tombol tidak sengaja tertimpa klik saat hilang */
+        }
+
+        /* KUNCI UTAMA: Memotong fisik kanvas agar bulat total & menghilangkan benjolan hitam */
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            border-radius: 50%; /* Memotong paksa sisi luar menjadi lingkaran */
+            overflow: hidden;
+        }
+
+        /* Wadah foto di tengah lingkaran */
+        .foto-tengah {
+            position: absolute;
+            width: 48px; /* Disesuaikan sebanding dengan tombol 120px */
+            height: 48px;
+            border-radius: 50%;
+            overflow: hidden;
+            z-index: 2;
+            background: #000;
+            border: 1px solid rgba(255, 100, 0, 0.4);
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            pointer-events: none; /* Klik diteruskan ke elemen link di bawahnya */
+        }
+
+        .foto-tengah img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
     </style>
 </head>
 <body>
@@ -210,6 +292,19 @@
                     <div class="feature-item"><span>👕</span> Rapi</div>
                     <div class="feature-item"><span>⏰</span> Praktis & Hemat Waktu</div>
                 </div>
+
+                 <!-- TOMBOL LINK BERBENTUK API -->
+    <!-- Ganti 'https://google.com' dengan URL halaman tujuan Anda -->
+    <a href="https://google.com" target="_blank" class="tombol-api-link" id="tombolApi">
+        <!-- Kanvas Animasi Api -->
+        <canvas id="canvasApi"></canvas>
+        
+        <!-- Foto di tengah -->
+        <div class="foto-tengah">
+            <!-- Ganti URL ini dengan foto.jpg milik Anda -->
+            <img src="https://picsum.photos" alt="Avatar">
+        </div>
+    </a>
 
                 <div class="promo-box">
                     <div class="promo-title">🎉 PROMO PELANGGAN BARU!</div>
@@ -831,6 +926,134 @@ function escapeHTML(teks) {
 muatGaleri();
 muatTestimoni();
     </script>
+
+    <!-- SCRIPT LOGIKA ANIMASI & SCROLL -->
+    <script>
+        const linkTombol = document.getElementById('tombolApi');
+        const canvas = document.getElementById('canvasApi');
+        const gl = canvas.getContext('webgl');
+
+        if (!gl) { alert('WebGL tidak didukung'); }
+
+        // Vertex & Fragment Shader yang sudah disederhanakan & dioptimasi ukurannya
+        const vsSource = `attribute vec2 position; void main() { gl_Position = vec4(position, 0.0, 1.0); }`;
+        const fsSource = `
+            precision mediump float;
+            uniform vec2 u_resolution;
+            uniform float u_time;
+            uniform float u_speed_multiplier;
+
+            vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+            vec2 mod289(vec2 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+            vec3 permute(vec3 x) { return mod289(((x*34.0)+1.0)*x); }
+
+            float snoise(vec2 v) {
+                const vec4 C = vec4(0.211324865405187, 0.366025403784439, -0.577350269189626, 0.024390243902439);
+                vec2 i  = floor(v + dot(v, C.yy) ); vec2 x0 = v -   i + dot(i, C.xx); vec2 i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
+                vec4 x12 = x0.xyxy + C.xxzz; x12.xy -= i1; i = mod289(i);
+                vec3 p = permute( permute( i.y + vec3(0.0, i1.y, 1.0 )) + i.x + vec3(0.0, i1.x, 1.0 ));
+                vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy), dot(x12.zw,x12.zw)), 0.0); m = m*m; m = m*m;
+                vec3 x = 2.0 * fract(p * C.www) - 1.0; vec3 h = abs(x) - 0.5; vec3 ox = floor(x + 0.5); vec3 a0 = x - ox;
+                m *= 1.79284291400159 - 0.85373472095314 * ( a0*a0 + h*h ); vec3 g; g.x = a0.x * x0.x + h.x * x0.y; g.yz = a0.yz * x12.xz + h.yz * x12.yw;
+                return 130.0 * dot(m, g);
+            }
+
+            void main() {
+                vec2 uv = (gl_FragCoord.xy - 0.5 * u_resolution.xy) / min(u_resolution.x, u_resolution.y);
+                float angle = atan(uv.y, uv.x);
+                float radius = length(uv);
+                
+                float targetSpeed = u_time * 1.2 * u_speed_multiplier;
+                float noiseAngle = angle - targetSpeed;
+                vec2 noiseUV = vec2(cos(noiseAngle), sin(noiseAngle)) * 3.8;
+                
+                float n = snoise(noiseUV + vec2(0.0, u_time * 0.5));
+                n += 0.5 * snoise(noiseUV * 2.0 - vec2(u_time * 0.3, u_time * 0.7));
+                n = n * 0.5 + 0.5;
+
+                float ringMin = 0.18;
+                float ringMax = 0.48;
+                
+                float firePattern = ringMin + n * (ringMax - ringMin);
+                float fireIntensity = smoothstep(firePattern, ringMin - 0.06, radius);
+                fireIntensity *= smoothstep(ringMin, ringMin + 0.04, radius);
+
+                vec3 colorGold = vec3(1.0, 0.85, 0.1);
+                vec3 colorOrange = vec3(1.0, 0.3, 0.0);
+                vec3 colorRed = vec3(0.8, 0.02, 0.0);
+
+                vec3 finalColor = mix(colorRed, colorOrange, smoothstep(0.1, 0.6, fireIntensity));
+                finalColor = mix(finalColor, colorGold, smoothstep(0.5, 0.9, fireIntensity));
+                finalColor *= fireIntensity * 2.5;
+
+                gl_FragColor = vec4(finalColor, 1.0);
+            }
+        `;
+
+        // Kompilasi shader WebGL standard
+        function createShader(gl, type, src) {
+            const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
+            return s;
+        }
+        const vs = createShader(gl, gl.VERTEX_SHADER, vsSource);
+        const fs = createShader(gl, gl.FRAGMENT_SHADER, fsSource);
+        const prog = gl.createProgram(); gl.attachShader(prog, vs); gl.attachShader(prog, fs); gl.linkProgram(prog);
+        
+        const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, -1,1, 1,-1, 1,1]), gl.STATIC_DRAW);
+        const pos = gl.getAttribLocation(prog, "position"); gl.enableVertexAttribArray(pos); gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
+        gl.useProgram(prog);
+
+        const resLoc = gl.getUniformLocation(prog, "u_resolution");
+        const timeLoc = gl.getUniformLocation(prog, "u_time");
+        const speedLoc = gl.getUniformLocation(prog, "u_speed_multiplier");
+
+        // VARIABEL KONTROL KECEPATAN
+        let speedMultiplier = 1.0;
+        let targetSpeedMultiplier = 1.0;
+
+        // Saat tombol ditekan/diklik, putaran bertambah cepat 4.5 kali lipat
+        linkTombol.addEventListener('mousedown', () => targetSpeedMultiplier = 4.5);
+        linkTombol.addEventListener('mouseup', () => targetSpeedMultiplier = 1.0);
+        linkTombol.addEventListener('touchstart', () => targetSpeedMultiplier = 4.5);
+        linkTombol.addEventListener('touchend', () => targetSpeedMultiplier = 1.0);
+
+        function resize() {
+            canvas.width = 120;
+            canvas.height = 120;
+            gl.viewport(0, 0, 120, 120);
+        }
+        resize();
+
+        // ==========================================
+        /* LOGIKA JAVASCRIPT: HILANG/MUNCUL SAAT SCROLL */
+        // ==========================================
+        let timeoutScroll;
+        window.addEventListener('scroll', () => {
+            // 1. Tambahkan kelas tersembunyi ketika layar dideteksi sedang bergerak/scroll
+            linkTombol.classList.add('tersembunyi');
+
+            // 2. Bersihkan timer sebelumnya
+            clearTimeout(timeoutScroll);
+
+            // 3. Setel timer baru: Jika berhenti scroll selama 1.2 detik (1200ms), munculkan kembali tombolnya
+            timeoutScroll = setTimeout(() => {
+                linkTombol.classList.remove('tersembunyi');
+            }, 1200); 
+        });
+
+        // Loop Animasi Utama
+        function render(time) {
+            time *= 0.001;
+            speedMultiplier += (targetSpeedMultiplier - speedMultiplier) * 0.1;
+            gl.uniform2f(resLoc, canvas.width, canvas.height);
+            gl.uniform1f(timeLoc, time);
+            gl.uniform1f(speedLoc, speedMultiplier);
+            gl.drawArrays(gl.TRIANGLES, 0, 6);
+            requestAnimationFrame(render);
+        }
+        requestAnimationFrame(render);
+        </script>
 </body>
 </html>
             
