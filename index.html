@@ -168,26 +168,32 @@
             margin-top: 10px;
         }
 
-         /* ========================================================== */
+        /* ========================================================== */
         /* STRUKTUR UTAMA TOMBOL ANIMASI (FLOATING ACTION BUTTON) */
         /* ========================================================== */
         .tombol-api-link {
             position: fixed;
             bottom: 25px; /* Jarak dari bawah layar */
             right: 25px;  /* Jarak dari kanan layar */
-            width: 140px; /* Sedikit diperbesar menjadi 140px agar ruang awan jingga terlihat megah */
+            width: 140px; 
             height: 140px;
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 9999;
             text-decoration: none;
             
-            /* Efek Transisi Halus saat Muncul/Hilang ketika Scroll */
-            transition: opacity 0.4s ease, transform 0.4s ease, visibility 0.4s;
-            opacity: 1;
-            transform: scale(1);
-            visibility: visible;
+            /* KUNCI PERBAIKAN 1: Naikkan tingkat lapisan ke angka maksimal 
+               agar tombol dipaksa melayang DI ATAS tirai menu garis tiga */
+            z-index: 999999999 !important; 
+            
+            /* KUNCI PERBAIKAN 2: Memastikan tombol tidak terpengaruh oleh 
+               efek pergeseran halaman (transform) saat menu garis tiga dibuka */
+            transform: translate3d(0, 0, 0) !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            
+            /* Efek Transisi Halus saat Muncul */
+            transition: opacity 0.4s ease, transform 0.4s ease;
         }
 
         /* Kelas CSS yang otomatis aktif saat layar HP di-scroll */
@@ -1036,19 +1042,6 @@ muatTestimoni();
             gl.viewport(0, 0, size, size);
         }
         resize();
-
-        // GANTI BLOK LOGIKA SCROLL LAMA DENGAN KODE BARU INI:
-let timeoutScroll;
-function munculkanTombol() {
-    linkTombol.classList.remove('tersembunyi');
-}
-
-window.addEventListener('scroll', () => {
-    linkTombol.classList.add('tersembunyi');
-    clearTimeout(timeoutScroll);
-    // Waktu tunggu dipercepat menjadi 800ms (0.8 detik) agar tombol lebih cepat muncul kembali
-    timeoutScroll = setTimeout(munculkanTombol, 800); 
-});
 
 // Pemicu Cadangan: Jika tombol terjebak hilang setelah klik menu, 
 // begitu layar disentuh atau digeser sedikit oleh jari, tombol langsung dipaksa muncul
