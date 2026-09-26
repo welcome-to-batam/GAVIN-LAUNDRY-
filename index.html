@@ -1037,17 +1037,7 @@ muatTestimoni();
         }
         resize();
 
-        // Sistem Auto Hide saat halaman di-scroll
-        let timeoutScroll;
-        window.addEventListener('scroll', () => {
-            linkTombol.classList.add('tersembunyi');
-            clearTimeout(timeoutScroll);
-            timeoutScroll = setTimeout(() => {
-                linkTombol.classList.remove('tersembunyi');
-            }, 1200); 
-        });
-
-        // Loop Animasi Render Utama
+                // Loop Animasi Render Utama
         function render(time) {
             time *= 0.001;
             speedMultiplier += (targetSpeedMultiplier - speedMultiplier) * 0.1;
