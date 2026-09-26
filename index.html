@@ -168,32 +168,15 @@
             margin-top: 10px;
         }
 
-         /* CSS Tambahan untuk simulasi scroll halaman */
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #0d0d0d;
-            font-family: sans-serif;
-            color: #fff;
-            height: 250vh; /* Membuat halaman panjang ke bawah agar bisa di-scroll */
-        }
-
-        .konten-dummy {
-            padding: 30px;
-            font-size: 1.2rem;
-            line-height: 1.8;
-            max-width: 600px;
-        }
-
-        /* ========================================== */
-        /* STRUKTUR UTAMA TOMBOL API (FLOATING BUTTON) */
-        /* ========================================== */
+         /* ========================================================== */
+        /* STRUKTUR UTAMA TOMBOL ANIMASI (FLOATING ACTION BUTTON) */
+        /* ========================================================== */
         .tombol-api-link {
             position: fixed;
             bottom: 25px; /* Jarak dari bawah layar */
             right: 25px;  /* Jarak dari kanan layar */
-            width: 120px; /* Ukuran tombol */
-            height: 120px;
+            width: 140px; /* Sedikit diperbesar menjadi 140px agar ruang awan jingga terlihat megah */
+            height: 140px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -207,7 +190,7 @@
             visibility: visible;
         }
 
-        /* Kelas CSS ketika halaman sedang di-scroll */
+        /* Kelas CSS yang otomatis aktif saat layar HP di-scroll */
         .tombol-api-link.tersembunyi {
             opacity: 0;
             transform: scale(0.7) translateY(20px);
@@ -215,33 +198,47 @@
             pointer-events: none;
         }
 
-        /* Memotong fisik kanvas agar lingkaran presisi */
+        /* ========================================================== */
+        /* EFEK BARU: GUMPALAN AWAN JINGGA KOSMIS (BACKGROUND NEBULA) */
+        /* ========================================================== */
+        .tombol-api-link::before {
+            content: '';
+            position: absolute;
+            width: 85%;
+            height: 85%;
+            border-radius: 50%;
+            /* Membuat efek gradasi awan nebula jingga keemasan yang menyala */
+            background: radial-gradient(circle, rgba(255,120,0,0.85) 0%, rgba(200,60,0,0.6) 40%, rgba(100,20,0,0.2) 70%, rgba(0,0,0,0) 100%);
+            z-index: 0;
+            filter: blur(6px); /* Memberikan efek gumpalan awan kabur yang lembut */
+            animation: denyutAwan 4s infinite ease-in-out alternate;
+        }
+
+        /* Kanvas WebGL tempat jilatan api berputar di atas awan jingga */
         canvas {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            width: 85%;
+            height: 85%;
             z-index: 1;
             border-radius: 50%;
             overflow: hidden;
         }
 
-        /* PERBAIKAN: Wadah foto tengah diubah latarnya menjadi putih transparan untuk efek lensa putih */
+        /* WADAH FOTO LUBANG TENGAH (EFEK LENSA CEMBUNG HITAM) */
         .foto-tengah {
             position: absolute;
-            width: 48px;
-            height: 48px;
+            width: 52px;
+            height: 52px;
             border-radius: 50%;
             overflow: hidden;
             z-index: 2;
-            background: #ffffff; /* Mengubah warna dasar lubang tengah menjadi putih */
-            border: 2px solid rgba(255, 255, 255, 0.8); /* Frame lingkar putih */
+            background: #000000; /* Tetap hitam pekat agar efek lensa 3D kaca berkilau maksimal */
+            border: 1px solid rgba(255, 130, 0, 0.5);
             
-            /* Efek lensa cembung dengan bayangan dalam bernuansa putih-terang */
+            /* Bayangan dalam (Vignette) pembentuk lensa kaca 3D cembung */
             box-shadow: 
-                inset 0 0 8px rgba(0, 0, 0, 0.3),
-                0 0 15px rgba(255, 255, 255, 0.6);
+                inset 0 0 10px rgba(0, 0, 0, 0.9),
+                0 0 8px rgba(255, 150, 0, 0.5);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -252,6 +249,12 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+        }
+
+        /* Animasi tambahan agar gumpalan awan di latar belakang tampak hidup berdenyut */
+        @keyframes denyutAwan {
+            0% { transform: scale(0.95); opacity: 0.7; }
+            100% { transform: scale(1.08); opacity: 1; filter: blur(8px); }
         }
     </style>
 </head>
@@ -297,15 +300,14 @@
                     <div class="feature-item"><span>⏰</span> Praktis & Hemat Waktu</div>
                 </div>
 
-                 <!-- TOMBOL LINK BERBENTUK API -->
-    <!-- Ganti 'https://google.com' dengan URL halaman tujuan Anda -->
+                <!-- TOMBOL NAVIGASI DENGAN TEMA AWAN KOSMIS & API -->
     <a href="https://google.com" target="_blank" class="tombol-api-link" id="tombolApi">
-        <!-- Kanvas Animasi Api -->
+        <!-- Kanvas Animasi Api WebGL -->
         <canvas id="canvasApi"></canvas>
         
-        <!-- Foto di tengah -->
+        <!-- Lingkaran Foto Lensa Cembung -->
         <div class="foto-tengah">
-            <!-- Ganti URL ini dengan foto.jpg milik Anda -->
+            <!-- Ganti URL di bawah ini dengan file foto.jpg asli Anda -->
             <img src="foto.png" alt="Avatar">
         </div>
     </a>
@@ -935,11 +937,12 @@ muatTestimoni();
     <script>
         const linkTombol = document.getElementById('tombolApi');
         const canvas = document.getElementById('canvasApi');
-        const gl = canvas.getContext('webgl');
+        
+        // Mengunci opsi alpha transparansi WebGL agar awan jingga di belakangnya terlihat jelas tembus pandang
+        const gl = canvas.getContext('webgl', { alpha: true, premultipliedAlpha: false });
 
         if (!gl) { alert('WebGL tidak didukung'); }
 
-        // Vertex & Fragment Shader yang sudah disederhanakan & dioptimasi ukurannya
         const vsSource = `attribute vec2 position; void main() { gl_Position = vec4(position, 0.0, 1.0); }`;
         const fsSource = `
             precision mediump float;
@@ -967,7 +970,7 @@ muatTestimoni();
                 float angle = atan(uv.y, uv.x);
                 float radius = length(uv);
                 
-                float targetSpeed = u_time * 1.2 * u_speed_multiplier;
+                float targetSpeed = u_time * 1.3 * u_speed_multiplier;
                 float noiseAngle = angle - targetSpeed;
                 vec2 noiseUV = vec2(cos(noiseAngle), sin(noiseAngle)) * 3.8;
                 
@@ -975,26 +978,30 @@ muatTestimoni();
                 n += 0.5 * snoise(noiseUV * 2.0 - vec2(u_time * 0.3, u_time * 0.7));
                 n = n * 0.5 + 0.5;
 
-                float ringMin = 0.18;
-                float ringMax = 0.48;
+                float ringMin = 0.16;
+                float ringMax = 0.46;
                 
                 float firePattern = ringMin + n * (ringMax - ringMin);
                 float fireIntensity = smoothstep(firePattern, ringMin - 0.06, radius);
                 fireIntensity *= smoothstep(ringMin, ringMin + 0.04, radius);
 
-                vec3 colorGold = vec3(1.0, 0.85, 0.1);
-                vec3 colorOrange = vec3(1.0, 0.3, 0.0);
-                vec3 colorRed = vec3(0.8, 0.02, 0.0);
+                // Peracikan warna api emas menyala terang
+                vec3 colorGold = vec3(1.0, 0.88, 0.2);
+                vec3 colorOrange = vec3(1.0, 0.4, 0.0);
+                vec3 colorRed = vec3(0.85, 0.05, 0.0);
 
                 vec3 finalColor = mix(colorRed, colorOrange, smoothstep(0.1, 0.6, fireIntensity));
                 finalColor = mix(finalColor, colorGold, smoothstep(0.5, 0.9, fireIntensity));
                 finalColor *= fireIntensity * 2.5;
 
-                gl_FragColor = vec4(finalColor, 1.0);
+                // Memotong kanvas luar agar transparan penuh mengikuti lekukan lingkaran api
+                float alphaMask = smoothstep(0.48, 0.44, radius);
+                float finalAlpha = min(fireIntensity * 4.0, alphaMask);
+
+                gl_FragColor = vec4(finalColor, finalAlpha);
             }
         `;
 
-        // Kompilasi shader WebGL standard
         function createShader(gl, type, src) {
             const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
             return s;
@@ -1012,52 +1019,53 @@ muatTestimoni();
         const timeLoc = gl.getUniformLocation(prog, "u_time");
         const speedLoc = gl.getUniformLocation(prog, "u_speed_multiplier");
 
-        // VARIABEL KONTROL KECEPATAN
         let speedMultiplier = 1.0;
         let targetSpeedMultiplier = 1.0;
 
-        // Saat tombol ditekan/diklik, putaran bertambah cepat 4.5 kali lipat
+        // Listener interaksi klik tombol melesat cepat
         linkTombol.addEventListener('mousedown', () => targetSpeedMultiplier = 4.5);
         linkTombol.addEventListener('mouseup', () => targetSpeedMultiplier = 1.0);
         linkTombol.addEventListener('touchstart', () => targetSpeedMultiplier = 4.5);
         linkTombol.addEventListener('touchend', () => targetSpeedMultiplier = 1.0);
 
         function resize() {
-            canvas.width = 120;
-            canvas.height = 120;
-            gl.viewport(0, 0, 120, 120);
+            // Menyesuaikan ukuran piksel kanvas internal
+            const size = 140 * 0.85; 
+            canvas.width = size;
+            canvas.height = size;
+            gl.viewport(0, 0, size, size);
         }
         resize();
 
-        // ==========================================
-        /* LOGIKA JAVASCRIPT: HILANG/MUNCUL SAAT SCROLL */
-        // ==========================================
+        // Sistem Auto Hide saat halaman di-scroll
         let timeoutScroll;
         window.addEventListener('scroll', () => {
-            // 1. Tambahkan kelas tersembunyi ketika layar dideteksi sedang bergerak/scroll
             linkTombol.classList.add('tersembunyi');
-
-            // 2. Bersihkan timer sebelumnya
             clearTimeout(timeoutScroll);
-
-            // 3. Setel timer baru: Jika berhenti scroll selama 1.2 detik (1200ms), munculkan kembali tombolnya
             timeoutScroll = setTimeout(() => {
                 linkTombol.classList.remove('tersembunyi');
             }, 1200); 
         });
 
-        // Loop Animasi Utama
+        // Loop Animasi Render Utama
         function render(time) {
             time *= 0.001;
             speedMultiplier += (targetSpeedMultiplier - speedMultiplier) * 0.1;
             gl.uniform2f(resLoc, canvas.width, canvas.height);
             gl.uniform1f(timeLoc, time);
             gl.uniform1f(speedLoc, speedMultiplier);
+            
+            gl.enable(gl.BLEND);
+            gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+            gl.clearColor(0.0, 0.0, 0.0, 0.0);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+            
             gl.drawArrays(gl.TRIANGLES, 0, 6);
             requestAnimationFrame(render);
         }
         requestAnimationFrame(render);
-        </script>
+    </script>
 </body>
 </html>
             
