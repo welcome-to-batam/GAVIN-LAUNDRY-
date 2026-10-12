@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sanina-laundry-v58';
+const CACHE_NAME = 'sanina-laundry-v59';
 const ASSETS = [ 'index.html', 'manifest.json', 'public/logo.png', 'public/laundry-bg.jpg' ];
 
 self.addEventListener('install', e => {
