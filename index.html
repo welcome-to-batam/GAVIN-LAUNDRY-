@@ -168,6 +168,19 @@
             margin-top: 10px;
         }
 
+        /* Tombol Instalasi bawaan (Jika Aktif) */
+#installBtn {
+    background: #f59e0b;
+    color: white;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 20px;
+    font-weight: bold;
+    margin-top: 12px;
+    
+    cursor: pointer;
+}
+
         /* ========================================================== */
         /* STRUKTUR UTAMA TOMBOL ANIMASI (FLOATING ACTION BUTTON) */
         /* ========================================================== */
@@ -288,6 +301,7 @@
         <div class="hero"></div>
         <div class="main-container">
             <div class="slogan-card">
+                <button id="installBtn" style="display: none;">Instal Aplikasi</button>
                 <h1 class="app-title">SANINA LAUNDRY</h1>
                 <h2 class="app-subtitle">Solusi Cucian Anda!</h2>
                 <p class="pusing-text">Cucian numpuk? Jangan bikin pusing! 😄</p>
@@ -673,6 +687,26 @@ if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('sw.js');
     });
 }
+
+        // Logika Tombol Instal PWA
+        let deferredPrompt;
+        const installBtn = document.getElementById('installBtn');
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installBtn.style.display = 'block';
+        });
+
+        installBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    installBtn.style.display = 'none';
+                }
+                deferredPrompt = null;
+            }
+        });
 
 // ===== 6. MODE ADMIN =====
 firebase.auth().onAuthStateChanged(function(user) {
